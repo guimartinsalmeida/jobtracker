@@ -2,8 +2,9 @@ import express from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import pool from './config/db.js'
-import createUserTable from './data/createUserTable.js'
-import userRoutes from './routes/routes.js'
+import authRoutes from './routes/authRoutes.js'
+import userRoutes from './routes/userRoutes.js'
+import jobRoutes from './routes/jobRoutes.js'
 import errorHandling from './middlewares/errorHandler.js'
 dotenv.config()
 
@@ -15,15 +16,12 @@ app.use(express.json())
 app.use(cors())
 
 //routes
-app.use('/api', userRoutes)
-//error handling
+app.use('/api/auth', authRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/jobs', jobRoutes)
+
 app.use(errorHandling)
-
-// create table before running the server
-createUserTable()
-
 //testing pg connection
-
 app.get('/', async(req, res) =>{
   const result = await pool.query("SELECT current_database()")
   res.send(`the db name is: ${result.rows[0].current_database}`)
