@@ -3,7 +3,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import pool from './config/db.js'
 import createUserTable from './data/createUserTable.js'
-import userRoutes from './routes/userRoutes.js'
+import userRoutes from './routes/routes.js'
 import errorHandling from './middlewares/errorHandler.js'
 dotenv.config()
 
