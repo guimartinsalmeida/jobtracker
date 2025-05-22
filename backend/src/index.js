@@ -20,7 +20,7 @@ app.use('/api', userRoutes)
 app.use(errorHandling)
 
 // create table before running the server
-createUserTable()
+//createUserTable()
 
 //testing pg connection
 

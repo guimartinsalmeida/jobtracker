@@ -1,10 +1,9 @@
 import pkg from 'pg'
 import dotenv from 'dotenv'
-const {Pool} = pkg
- 
 dotenv.config()
 
-console.log(process.env.DB_PASSWORD)
+const { Pool } = pkg
+
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
@@ -13,9 +12,8 @@ const pool = new Pool({
   port: process.env.DB_PORT,
 })
 
-pool.on("connect", () => {
-  console.log("Connection pool establised with Database")
-  
+pool.on('connect', () => {
+  console.log('Connected to PostgreSQL')
 })
 
 export default pool
