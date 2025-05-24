@@ -6,6 +6,7 @@ import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
 import errorHandling from './middlewares/errorHandler.js'
+import resumeAnalysisRoutes from './routes/resumeAnalysisRoutes.js'
 dotenv.config()
 
 const app = express()
@@ -19,7 +20,7 @@ app.use(cors())
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/jobs', jobRoutes)
-
+app.use('/api/resume', resumeAnalysisRoutes)
 app.use(errorHandling)
 //testing pg connection
 app.get('/', async(req, res) =>{
