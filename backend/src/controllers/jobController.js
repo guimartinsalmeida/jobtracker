@@ -4,6 +4,7 @@ import {
   getJobByIdService,
   updateJobService,
   deleteJobService,
+  getJobsByUserIdService
 } from '../models/jobModel.js'
 
 // 🔸 Create an job
@@ -76,6 +77,17 @@ export const getJobById = async (req, res) => {
     res.status(200).json(job)
   } catch (error) {
     console.error('Error fetching job by ID:', error)
+    res.status(500).json({ message: 'Internal server error' })
+  }
+}
+// 🔸 Get job by User ID
+export const getJobsByUserId = async (req, res) => {
+  const { id } = req.params
+  try {
+    const jobs = await getJobsByUserIdService(id)
+    res.status(200).json(jobs)
+  } catch (error) {
+    console.error('Error fetching jobs by user ID:', error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }

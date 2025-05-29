@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import axios from 'axios';
 
 interface User {
@@ -18,7 +18,14 @@ interface UserContextType {
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    // Try to load user data from localStorage on initialization
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('user');
+      return savedUser ? JSON.parse(savedUser) : null;
+    }
+    return null;
+  });
 
   const fetchUserData = async (userId: string) => {
     try {
@@ -32,12 +39,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
           Authorization: `Bearer ${token}`
         }
       });
-      setUser(response.data.data);
-      console.log('User ID:', response.data.data);
+      const userData = response.data.data;
+      setUser(userData);
+      // Save user data to localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      console.log('User ID:', userData);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
+
+  // Update localStorage whenever user state changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('user');
+    }
+  }, [user]);
 
   return (
     <UserContext.Provider value={{ user, setUser, fetchUserData }}>

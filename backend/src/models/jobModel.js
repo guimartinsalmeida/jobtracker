@@ -55,6 +55,11 @@ export const getJobByIdService = async (id) => {
   return result.rows[0]
 }
 
+export const getJobsByUserIdService = async (userId) => {
+  const result = await pool.query('SELECT * FROM jobs WHERE user_id = $1', [userId])
+  return result.rows
+}
+
 export const updateJobService = async (id, jobData) => {
   const fields = Object.keys(jobData)
   const values = Object.values(jobData)

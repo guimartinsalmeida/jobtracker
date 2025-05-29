@@ -9,49 +9,7 @@ import { JobFilters } from '@/components/filters/JobFilters';
 import Modal from '@/components/ui/Modal';
 import JobForm from '@/components/jobs/JobForm';
 import axios from 'axios';
-
-const mockJobs: Job[] = [
-  {
-    id: 1,
-    title: 'Senior Frontend Developer',
-    company: 'Google',
-    location: 'San Francisco, CA (Remote)',
-    type: 'Full-time',
-    appliedDate: 'May 15, 2023',
-    status: 'Pending',
-    response: 'No response (8 days)',
-  },
-  {
-    id: 2,
-    title: 'UX Designer',
-    company: 'Microsoft',
-    location: 'Seattle, WA',
-    type: 'Full-time',
-    appliedDate: 'May 10, 2023',
-    status: 'Interview',
-    response: 'First response: 3 days',
-  },
-  {
-    id: 3,
-    title: 'Data Scientist',
-    company: 'Amazon',
-    location: 'New York, NY',
-    type: 'Full-time',
-    appliedDate: 'April 28, 2023',
-    status: 'Offer',
-    response: 'First response: 5 days',
-  },
-  {
-    id: 4,
-    title: 'Product Manager',
-    company: 'Apple',
-    location: 'Cupertino, CA',
-    type: 'Full-time',
-    appliedDate: 'April 20, 2023',
-    status: 'Rejected',
-    response: 'First response: 10 days',
-  },
-];
+import { useUser } from '@/contexts/UserContext';
 
 type Job = {
   id: number;
@@ -64,18 +22,86 @@ type Job = {
   response: string;
 };
 
+type ApiJob = {
+  id: number;
+  job_title: string;
+  company_name: string;
+  location: string;
+  job_type: string;
+  application_date: string;
+  phase: 'Pending' | 'Interview' | 'Offer' | 'Rejected';
+  first_response_days: number | null;
+};
+
 export default function HomePage() {
   const router = useRouter();
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const jobs: Job[] = mockJobs; // Troque para [] para testar o empty state
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user, fetchUserData } = useUser();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
       router.push('/auth/login');
+      return;
     }
-  }, [router]);
+
+    const initializeData = async () => {
+      try {
+        // If we don't have user data, try to fetch it
+        if (!user) {
+          const savedUser = localStorage.getItem('user');
+          if (savedUser) {
+            const parsedUser = JSON.parse(savedUser);
+            await fetchUserData(parsedUser.id);
+          } else {
+            router.push('/auth/login');
+            return;
+          }
+        }
+
+        const response = await axios.get(`http://localhost:3001/api/jobs/user/${user?.id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        
+        if (!Array.isArray(response.data)) {
+          console.error('API response is not an array:', response.data);
+          return;
+        }
+
+        const transformedJobs = response.data.map((job: ApiJob) => ({
+          id: job.id,
+          title: job.job_title,
+          company: job.company_name,
+          location: job.location,
+          type: job.job_type,
+          appliedDate: new Date(job.application_date).toLocaleDateString(),
+          status: job.phase,
+          response: job.first_response_days ? `First response: ${job.first_response_days} days` : 'No response yet',
+        }));
+        
+        setJobs(transformedJobs);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        if (axios.isAxiosError(error)) {
+          console.error('Axios error details:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+          });
+        }
+        alert('Error loading data. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
+  }, [router, user, fetchUserData]);
 
   const filteredJobs =
     selectedStatus === 'All'
@@ -93,11 +119,25 @@ export default function HomePage() {
         },
       });
       setIsModalOpen(false);
-      // Aqui você pode atualizar a lista de jobs futuramente
+      // Refresh the jobs list
+      window.location.reload();
     } catch {
       alert('Erro ao criar job. Tente novamente.');
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen bg-[#151A23]">
+        <Sidebar />
+        <main className="flex-1 p-10">
+          <div className="flex items-center justify-center h-full">
+            <div className="text-white">Loading...</div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-[#151A23]">
