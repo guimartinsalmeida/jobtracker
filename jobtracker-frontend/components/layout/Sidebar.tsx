@@ -16,7 +16,7 @@ export function Sidebar() {
         <SidebarItem icon={<FiHome />} label="Dashboard" href="/" active={pathname === '/'} />
         <SidebarItem icon={<FiBriefcase />} label="Jobs" href="/home" active={pathname === '/home'} />
         <SidebarItem icon={<FiCalendar />} label="Calendar" href="/calendar" active={pathname === '/calendar'} />
-        <SidebarItem icon={<FiBarChart2 />} label="Analytics" href="/analytics" active={pathname === '/analytics'} />
+        <SidebarItem icon={<FiBarChart2 />} label="Analytics" href="/analitycs" active={pathname === '/analitycs'} />
         <SidebarItem icon={<FiFileText />} label="Documents" href="/documents" active={pathname === '/documents'} />
         <SidebarItem icon={<FiUser />} label="Profile" href="/profile" active={pathname === '/profile'} />
       </nav>
