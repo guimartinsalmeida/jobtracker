@@ -1,23 +1,10 @@
 'use client';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { FiPlus } from 'react-icons/fi';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler } from 'chart.js';
 import { Doughnut, Line } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip,
-  Legend,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  TooltipItem,
-  ChartData,
-} from 'chart.js';
-import 'chart.js/auto';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Title);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler);
 
 const summaryCards = [
   {
@@ -82,80 +69,7 @@ const doughnutOptions = {
       display: false,
     },
   },
-};
-
-const lineData: ChartData<'line'> = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
-  datasets: [
-    {
-      label: 'Applications',
-      data: [3, 7, 6, 10, 13, 15, 18],
-      fill: true,
-      backgroundColor: 'rgba(59, 130, 246, 0.1)',
-      borderColor: '#3B82F6',
-      tension: 0.4,
-      pointBackgroundColor: '#3B82F6',
-      pointBorderColor: '#fff',
-      pointRadius: 4,
-      pointHoverRadius: 6,
-      borderWidth: 2,
-    },
-  ],
-};
-
-const lineOptions = {
-  responsive: true,
   maintainAspectRatio: false,
-  plugins: {
-    legend: { display: false },
-    tooltip: {
-      backgroundColor: 'rgba(24, 31, 42, 0.9)',
-      titleColor: '#fff',
-      bodyColor: '#fff',
-      borderColor: '#3B82F6',
-      borderWidth: 1,
-      padding: 12,
-      displayColors: false,
-      callbacks: {
-        label: function(context: TooltipItem<'line'>) {
-          return `Applications: ${context.parsed.y}`;
-        }
-      }
-    }
-  },
-  scales: {
-    x: {
-      grid: { 
-        display: true,
-        color: 'rgba(35, 43, 59, 0.3)',
-        drawBorder: false
-      },
-      ticks: { 
-        color: '#A3A3A3',
-        font: {
-          size: 12
-        }
-      },
-    },
-    y: {
-      grid: { 
-        color: 'rgba(35, 43, 59, 0.3)',
-        drawBorder: false
-      },
-      ticks: { 
-        color: '#A3A3A3',
-        stepSize: 2,
-        font: {
-          size: 12
-        }
-      },
-      beginAtZero: true,
-    },
-  },
-  interaction: {
-    intersect: false,
-    mode: 'index' as const,
-  },
 };
 
 const recentApplications = [
@@ -174,6 +88,69 @@ const recentApplications = [
     daysAgo: '5 days ago',
   },
 ];
+
+const lineChartData = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+  datasets: [
+    {
+      label: 'Applications',
+      data: [4, 6, 8, 5, 7, 9],
+      borderColor: '#3B82F6',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      tension: 0.4,
+      fill: true,
+      pointBackgroundColor: '#3B82F6',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+    },
+  ],
+};
+
+const lineChartOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      display: false,
+    },
+    tooltip: {
+      backgroundColor: '#181F2A',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      borderColor: '#232B3B',
+      borderWidth: 1,
+      padding: 12,
+      displayColors: false,
+      callbacks: {
+        label: function(context: { parsed: { y: number } }) {
+          return `Applications: ${context.parsed.y}`;
+        }
+      }
+    }
+  },
+  scales: {
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: '#9CA3AF',
+      },
+    },
+    y: {
+      beginAtZero: true,
+      grid: {
+        color: '#232B3B',
+      },
+      ticks: {
+        color: '#9CA3AF',
+        stepSize: 2,
+      },
+    },
+  },
+};
 
 export default function AnalyticsPage() {
   return (
@@ -223,7 +200,7 @@ export default function AnalyticsPage() {
               </div>
             </div>
             <div className="h-56">
-              <Line data={lineData} options={lineOptions} />
+              <Line data={lineChartData} options={lineChartOptions} />
             </div>
           </div>
         </div>
