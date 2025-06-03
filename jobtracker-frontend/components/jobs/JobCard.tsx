@@ -1,3 +1,6 @@
+import { useRouter } from 'next/navigation';
+import { useUser } from '@/contexts/UserContext';
+
 type Job = {
   id: number;
   title: string;
@@ -14,6 +17,9 @@ interface JobCardProps {
 }
 
 export function JobCard({ job }: JobCardProps) {
+  const router = useRouter();
+  const { user } = useUser();
+
   const statusColors: Record<Job['status'], string> = {
     Pending: 'bg-yellow-500 text-black',
     Interview: 'bg-blue-600 text-white',
@@ -22,7 +28,10 @@ export function JobCard({ job }: JobCardProps) {
   };
 
   return (
-    <div className="bg-[#232B3B] rounded-xl p-5 flex flex-col gap-2 shadow-md min-w-[300px]">
+    <div
+      className="bg-[#232B3B] rounded-xl p-5 flex flex-col gap-2 shadow-md min-w-[300px] cursor-pointer hover:bg-[#2c3650]"
+      onClick={() => router.push(`/jobs/${job.id}`)}
+    >
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-bold text-white">{job.title}</h3>

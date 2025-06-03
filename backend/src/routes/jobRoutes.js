@@ -14,7 +14,7 @@ const router = express.Router()
 router.post('/', authenticateToken, createJob)
 router.get('/', authenticateToken, getAllJobs)
 router.get('/user/:id', authenticateToken, getJobsByUserId)
-router.get('/:id', authenticateToken, getJobById)
+router.get('/:id', getJobById)
 router.put('/:id', authenticateToken, updateJob)
 router.delete('/:id', authenticateToken, deleteJob)
 
