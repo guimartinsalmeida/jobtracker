@@ -12,6 +12,8 @@ import {
   PointElement,
   LineElement,
   Title,
+  TooltipItem,
+  ChartData,
 } from 'chart.js';
 import 'chart.js/auto';
 
@@ -82,36 +84,77 @@ const doughnutOptions = {
   },
 };
 
-const lineData = {
-  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+const lineData: ChartData<'line'> = {
+  labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'],
   datasets: [
     {
       label: 'Applications',
-      data: [3, 7, 6, 10, 13],
-      fill: false,
+      data: [3, 7, 6, 10, 13, 15, 18],
+      fill: true,
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
       borderColor: '#3B82F6',
       tension: 0.4,
       pointBackgroundColor: '#3B82F6',
       pointBorderColor: '#fff',
-      pointRadius: 5,
+      pointRadius: 4,
+      pointHoverRadius: 6,
+      borderWidth: 2,
     },
   ],
 };
 
 const lineOptions = {
+  responsive: true,
+  maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
+    tooltip: {
+      backgroundColor: 'rgba(24, 31, 42, 0.9)',
+      titleColor: '#fff',
+      bodyColor: '#fff',
+      borderColor: '#3B82F6',
+      borderWidth: 1,
+      padding: 12,
+      displayColors: false,
+      callbacks: {
+        label: function(context: TooltipItem<'line'>) {
+          return `Applications: ${context.parsed.y}`;
+        }
+      }
+    }
   },
   scales: {
     x: {
-      grid: { display: false },
-      ticks: { color: '#A3A3A3' },
+      grid: { 
+        display: true,
+        color: 'rgba(35, 43, 59, 0.3)',
+        drawBorder: false
+      },
+      ticks: { 
+        color: '#A3A3A3',
+        font: {
+          size: 12
+        }
+      },
     },
     y: {
-      grid: { color: '#232B3B' },
-      ticks: { color: '#A3A3A3', stepSize: 2 },
+      grid: { 
+        color: 'rgba(35, 43, 59, 0.3)',
+        drawBorder: false
+      },
+      ticks: { 
+        color: '#A3A3A3',
+        stepSize: 2,
+        font: {
+          size: 12
+        }
+      },
       beginAtZero: true,
     },
+  },
+  interaction: {
+    intersect: false,
+    mode: 'index' as const,
   },
 };
 
