@@ -23,6 +23,8 @@ interface JobDetail {
   updated_at: string;
 }
 
+const API_BASE_URL = 'http://localhost:3001';
+
 function formatDate(dateStr: string) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -39,7 +41,7 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     if (params.id) {
-      fetch(`http://localhost:3001/api/jobs/${params.id}`)
+      fetch(`${API_BASE_URL}/api/jobs/${params.id}`)
         .then(res => res.json())
         .then(data => {
           setJob(data);
@@ -49,7 +51,7 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
   }, [params.id]);
 
   const handlePdfClick = (url: string) => {
-    setSelectedPdfUrl(url);
+    setSelectedPdfUrl(`${API_BASE_URL}${url}`);
     setShowPdfPreview(true);
   };
 
@@ -72,8 +74,8 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
 
   // Arquivos
   const files = [
-    job.cv_file_url && { name: 'Frontend_CV.pdf', url: job.cv_file_url },
-    job.cover_letter_url && { name: 'Cover_Letter.docx', url: job.cover_letter_url },
+    job.cv_file_url && { name: 'Frontend_CV.pdf', url: `${API_BASE_URL}${job.cv_file_url}` },
+    job.cover_letter_url && { name: 'Cover_Letter.docx', url: `${API_BASE_URL}${job.cover_letter_url}` },
   ].filter(Boolean) as { name: string; url: string }[];
 
   // Timeline exemplo
@@ -124,11 +126,15 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
               </div>
             </div>
             <div className="flex-1 p-4 overflow-hidden">
-              <iframe
-                src={`${selectedPdfUrl}#toolbar=0`}
+              <object
+                data={selectedPdfUrl}
+                type="application/pdf"
                 className="w-full h-full rounded"
-                title="PDF Preview"
-              />
+              >
+                <div className="flex items-center justify-center h-full text-gray-400">
+                  <p>Unable to display PDF file. <a href={selectedPdfUrl} className="text-blue-400 hover:underline">Download</a> instead.</p>
+                </div>
+              </object>
             </div>
           </div>
         </div>
