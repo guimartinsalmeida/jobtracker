@@ -1,5 +1,4 @@
 import { useRouter } from 'next/navigation';
-import { useUser } from '@/contexts/UserContext';
 
 type Job = {
   id: number;
@@ -18,7 +17,7 @@ interface JobCardProps {
 
 export function JobCard({ job }: JobCardProps) {
   const router = useRouter();
-  const { user } = useUser();
+  
 
   const statusColors: Record<Job['status'], string> = {
     Pending: 'bg-yellow-500 text-black',

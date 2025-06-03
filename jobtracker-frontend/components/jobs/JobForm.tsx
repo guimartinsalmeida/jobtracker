@@ -1,13 +1,29 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { FaInfoCircle, FaClipboardList, FaFileAlt, FaRegStickyNote } from 'react-icons/fa';
 
+interface JobFormData {
+  job_title: string;
+  company_name: string;
+  location: string;
+  job_type: string;
+  application_date: string;
+  platform: string;
+  phase: string;
+  cv_file_url: string;
+  cover_letter_url: string;
+  job_description: string;
+  first_response_days: string;
+  feedback: string;
+  notes: string;
+}
+
 interface JobFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: JobFormData | FormData) => void;
   onCancel: () => void;
 }
 
 export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<JobFormData>({
     job_title: '',
     company_name: '',
     location: '',
@@ -23,13 +39,47 @@ export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
     notes: '',
   });
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      if (file.type === 'application/pdf') {
+        setSelectedFile(file);
+        setForm({ ...form, cv_file_url: file.name });
+      } else {
+        alert('Please select a PDF file');
+      }
+    }
+  };
+
+  const handleFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(form);
+    
+    if (selectedFile) {
+      const formData = new FormData();
+      formData.append('cv_file', selectedFile);
+      
+      // Append all other form fields
+      Object.keys(form).forEach(key => {
+        if (key !== 'cv_file_url') {
+          formData.append(key, form[key as keyof typeof form]);
+        }
+      });
+
+      onSubmit(formData);
+    } else {
+      onSubmit(form);
+    }
   };
 
   return (
@@ -111,11 +161,30 @@ export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
               <div>
-                <label className="block mb-1 text-sm font-medium">Resume/CV URL <span className="text-red-400">*</span></label>
-                <input name="cv_file_url" value={form.cv_file_url} onChange={handleChange} required placeholder="URL to your resume" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+                <label className="block mb-1 text-sm font-medium">Resume/CV <span className="text-red-400">*</span></label>
+                <input 
+                  type="text" 
+                  value={form.cv_file_url} 
+                  readOnly 
+                  placeholder="Select a PDF file" 
+                  className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" 
+                />
               </div>
               <div>
-                <button type="button" className="w-full flex items-center justify-center gap-2 p-2 rounded bg-gray-700 hover:bg-gray-800 text-sm font-medium"><span>Upload</span></button>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept=".pdf"
+                  className="hidden"
+                />
+                <button 
+                  type="button" 
+                  onClick={handleFileClick}
+                  className="w-full flex items-center justify-center gap-2 p-2 rounded bg-gray-700 hover:bg-gray-800 text-sm font-medium"
+                >
+                  <span>Upload PDF</span>
+                </button>
               </div>
               <div>
                 <label className="block mb-1 text-sm font-medium">Cover Letter URL</label>

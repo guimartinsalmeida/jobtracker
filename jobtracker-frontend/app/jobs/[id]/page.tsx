@@ -34,6 +34,8 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
 
   useEffect(() => {
     if (params.id) {
@@ -45,6 +47,11 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
         });
     }
   }, [params.id]);
+
+  const handlePdfClick = (url: string) => {
+    setSelectedPdfUrl(url);
+    setShowPdfPreview(true);
+  };
 
   if (loading || !job) return <div className="text-white p-8">Loading...</div>;
 
@@ -91,6 +98,42 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-[#181C23] text-white p-0 md:p-8">
+      {/* PDF Preview Modal */}
+      {showPdfPreview && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232B3B] rounded-lg w-full max-w-4xl h-[90vh] flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b border-gray-700">
+              <h3 className="text-lg font-semibold">PDF Preview</h3>
+              <div className="flex gap-2">
+                <a
+                  href={selectedPdfUrl}
+                  download
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium flex items-center gap-2"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                  </svg>
+                  Download
+                </a>
+                <button
+                  onClick={() => setShowPdfPreview(false)}
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white font-medium"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+            <div className="flex-1 p-4 overflow-hidden">
+              <iframe
+                src={`${selectedPdfUrl}#toolbar=0`}
+                className="w-full h-full rounded"
+                title="PDF Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto">
         {/* Botões Edit e Delete no topo */}
         <div className="flex justify-end gap-3">
@@ -136,7 +179,21 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
               {files.map(file => (
                 <div key={file.name} className="flex items-center justify-between bg-[#181C23] rounded px-3 py-2">
                   <span className="truncate max-w-[120px] md:max-w-[180px]">{file.name}</span>
-                  <a href={file.url} download className="text-blue-400 hover:underline text-lg">⬇️</a>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handlePdfClick(file.url)}
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      👁️
+                    </button>
+                    <a
+                      href={file.url}
+                      download
+                      className="text-blue-400 hover:text-blue-300"
+                    >
+                      ⬇️
+                    </a>
+                  </div>
                 </div>
               ))}
               <button className="mt-2 px-3 py-1 bg-[#232B3B] border border-gray-600 rounded text-gray-400 hover:bg-[#181C23]">+ Add New File</button>

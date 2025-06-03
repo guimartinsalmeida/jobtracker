@@ -7,6 +7,12 @@ import userRoutes from './routes/userRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
 import errorHandling from './middlewares/errorHandler.js'
 import resumeAnalysisRoutes from './routes/resumeAnalysisRoutes.js'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config()
 
 const app = express()
@@ -15,6 +21,9 @@ const port = process.env.PORT || 3001
 
 app.use(express.json())
 app.use(cors())
+
+// Serve static files from the uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 
 //routes
 app.use('/api/auth', authRoutes)

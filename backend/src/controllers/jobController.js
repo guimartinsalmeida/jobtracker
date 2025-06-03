@@ -6,48 +6,63 @@ import {
   deleteJobService,
   getJobsByUserIdService
 } from '../models/jobModel.js'
+import { upload } from '../middlewares/uploadMiddleware.js'
 
 // 🔸 Create an job
 export const createJob = async (req, res) => {
-  const {
-    job_title,
-    company_name,
-    cv_file_url,
-    cover_letter_url,
-    job_description,
-    phase,
-    application_date,
-    platform,
-    first_response_days,
-    feedback,
-    location,
-    job_type,
-    notes,
-  } = req.body
-
-  const user_id = req.userId 
-
   try {
-    const job = await createJobInDB({
-      user_id,
-      job_title,
-      company_name,
-      cv_file_url,
-      cover_letter_url,
-      job_description,
-      phase,
-      application_date,
-      platform,
-      first_response_days,
-      feedback,
-      location,
-      job_type,
-      notes,
-    })
+    // Handle file upload
+    upload.single('cv_file')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
 
-    res.status(201).json({ message: 'Job created', job })
+      const {
+        job_title,
+        company_name,
+        cover_letter_url,
+        job_description,
+        phase,
+        application_date,
+        platform,
+        first_response_days,
+        feedback,
+        location,
+        job_type,
+        notes,
+      } = req.body
+
+      const user_id = req.userId
+      
+      // Get the file path if a file was uploaded
+      const cv_file_url = req.file ? `/uploads/${req.file.filename}` : null
+
+      try {
+        const job = await createJobInDB({
+          user_id,
+          job_title,
+          company_name,
+          cv_file_url,
+          cover_letter_url,
+          job_description,
+          phase,
+          application_date,
+          platform,
+          first_response_days,
+          feedback,
+          location,
+          job_type,
+          notes,
+        })
+
+        res.status(201).json({ message: 'Job created', job })
+      } catch (error) {
+        console.error('Error creating job:', error)
+        res.status(500).json({ message: 'Internal server error' })
+      }
+    })
   } catch (error) {
-    console.error('Error creating job:', error)
+    console.error('Error in file upload:', error)
     res.status(500).json({ message: 'Internal server error' })
   }
 }
