@@ -16,6 +16,6 @@ router.get('/', authenticateToken, getAllJobs)
 router.get('/user/:id', authenticateToken, getJobsByUserId)
 router.get('/:id', getJobById)
 router.put('/:id', authenticateToken, updateJob)
-router.delete('/:id', authenticateToken, deleteJob)
+router.delete('/:id', deleteJob)
 
 export default router

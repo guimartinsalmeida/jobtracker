@@ -38,6 +38,8 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [showPdfPreview, setShowPdfPreview] = useState(false);
   const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (params.id) {
@@ -53,6 +55,30 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
   const handlePdfClick = (url: string) => {
     setSelectedPdfUrl(`${API_BASE_URL}${url}`);
     setShowPdfPreview(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      setIsDeleting(true);
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${params.id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete job');
+      }
+
+      router.push('/home');
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      alert('Failed to delete job. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
   };
 
   if (loading || !job) return <div className="text-white p-8">Loading...</div>;
@@ -100,6 +126,44 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
 
   return (
     <div className="min-h-screen bg-[#181C23] text-white p-0 md:p-8">
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-[#232B3B] rounded-lg w-full max-w-md p-6">
+            <h3 className="text-xl font-semibold mb-4">Delete Job Application</h3>
+            <p className="text-gray-300 mb-6">
+              Are you sure you want to delete this job application? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white font-medium"
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded text-white font-medium flex items-center gap-2"
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* PDF Preview Modal */}
       {showPdfPreview && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
@@ -149,7 +213,10 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
             </svg>
             Edit Job
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold shadow transition-colors duration-150">
+          <button 
+            onClick={() => setShowDeleteModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg text-white font-semibold shadow transition-colors duration-150"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
