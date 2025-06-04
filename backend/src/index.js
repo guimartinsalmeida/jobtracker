@@ -9,6 +9,7 @@ import errorHandling from './middlewares/errorHandler.js'
 import resumeAnalysisRoutes from './routes/resumeAnalysisRoutes.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import analyticsRoutes from './routes/analyticsRoutes.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/jobs', jobRoutes)
 app.use('/api/resume', resumeAnalysisRoutes)
+app.use('/api/analytics', analyticsRoutes)
 app.use(errorHandling)
 //testing pg connection
 app.get('/', async(req, res) =>{
