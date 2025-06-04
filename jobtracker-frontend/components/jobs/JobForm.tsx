@@ -87,72 +87,8 @@ export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
       onSubmit={handleSubmit}
       className="space-y-8 w-full max-w-5xl text-white mx-auto"
     >
-      <div className="flex flex-col md:flex-row gap-8 w-full">
-        <div className="flex-1 space-y-6">
-          {/* Basic Information */}
-          <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
-            <div className="flex items-center gap-2 mb-4">
-              <FaInfoCircle className="text-blue-400 text-xl" />
-              <h2 className="text-xl font-bold tracking-tight">Basic Information</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-1 text-sm font-medium">Job Title <span className="text-red-400">*</span></label>
-                <input name="job_title" value={form.job_title} onChange={handleChange} required placeholder="e.g. Frontend Developer" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Company Name <span className="text-red-400">*</span></label>
-                <input name="company_name" value={form.company_name} onChange={handleChange} required placeholder="e.g. Acme Corp" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Location <span className="text-red-400">*</span></label>
-                <input name="location" value={form.location} onChange={handleChange} required placeholder="e.g. Remote, São Paulo" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Job Type <span className="text-red-400">*</span></label>
-                <select name="job_type" value={form.job_type} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="">Select job type</option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Internship">Internship</option>
-                  <option value="Contract">Contract</option>
-                </select>
-              </div>
-            </div>
-          </div>
-          {/* Application Details */}
-          <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
-            <div className="flex items-center gap-2 mb-4">
-              <FaClipboardList className="text-blue-400 text-xl" />
-              <h2 className="text-xl font-bold tracking-tight">Application Details</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-1 text-sm font-medium">Application Date <span className="text-red-400">*</span></label>
-                <input type="date" name="application_date" value={form.application_date} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Application Platform <span className="text-red-400">*</span></label>
-                <input name="platform" value={form.platform} onChange={handleChange} required placeholder="e.g. LinkedIn, Gupy" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Current Phase <span className="text-red-400">*</span></label>
-                <select name="phase" value={form.phase} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="">Select current phase</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Interview">Interview</option>
-                  <option value="Offer">Offer</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Days to First Response</label>
-                <input type="number" name="first_response_days" value={form.first_response_days} onChange={handleChange} placeholder="e.g. 5" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="flex-1 space-y-6">
+      <div className="flex flex-col md:flex-row gap-1 w-full">
+      <div className="flex-1 space-y-2">
           {/* Documents */}
           <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
             <div className="flex items-center gap-2 mb-4">
@@ -217,8 +153,73 @@ export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
             </div>
           </div>
         </div>
-      </div>
-      <div className="flex justify-end gap-2 mt-6">
+        <div className='flex flex-col justify-between'>
+        <div className="flex-1 space-y-2">
+          {/* Basic Information */}
+          <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
+            <div className="flex items-center gap-2 mb-4">
+              <FaInfoCircle className="text-blue-400 text-xl" />
+              <h2 className="text-xl font-bold tracking-tight">Basic Information</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 text-sm font-medium">Job Title <span className="text-red-400">*</span></label>
+                <input name="job_title" value={form.job_title} onChange={handleChange} required placeholder="e.g. Frontend Developer" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Company Name <span className="text-red-400">*</span></label>
+                <input name="company_name" value={form.company_name} onChange={handleChange} required placeholder="e.g. Acme Corp" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Location <span className="text-red-400">*</span></label>
+                <input name="location" value={form.location} onChange={handleChange} required placeholder="e.g. Remote, São Paulo" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Job Type <span className="text-red-400">*</span></label>
+                <select name="job_type" value={form.job_type} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">Select job type</option>
+                  <option value="Full-time">Full-time</option>
+                  <option value="Part-time">Part-time</option>
+                  <option value="Internship">Internship</option>
+                  <option value="Contract">Contract</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          {/* Application Details */}
+          <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
+            <div className="flex items-center gap-2 mb-4">
+              <FaClipboardList className="text-blue-400 text-xl" />
+              <h2 className="text-xl font-bold tracking-tight">Application Details</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block mb-1 text-sm font-medium">Application Date <span className="text-red-400">*</span></label>
+                <input type="date" name="application_date" value={form.application_date} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Application Platform <span className="text-red-400">*</span></label>
+                <input name="platform" value={form.platform} onChange={handleChange} required placeholder="e.g. LinkedIn, Gupy" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Current Phase <span className="text-red-400">*</span></label>
+                <select name="phase" value={form.phase} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none">
+                  <option value="">Select current phase</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Interview">Interview</option>
+                  <option value="Offer">Offer</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 text-sm font-medium">Days to First Response</label>
+                <input type="number" name="first_response_days" value={form.first_response_days} onChange={handleChange} placeholder="e.g. 5" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+              </div>
+            </div>
+          </div>
+        </div>
+      
+          <div className="flex justify-end gap-2">
         <button
           type="button"
           onClick={onCancel}
@@ -233,6 +234,11 @@ export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
           Save
         </button>
       </div>
+        </div>
+
+        
+      </div>
+     
     </form>
   );
 } 
