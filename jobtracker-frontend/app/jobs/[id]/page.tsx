@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { Sidebar } from '@/components/layout/Sidebar';
 
 interface JobDetail {
   id: number;
@@ -81,7 +82,73 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
     }
   };
 
-  if (loading || !job) return <div className="text-white p-8">Loading...</div>;
+  if (loading || !job) {
+    return (
+      <div className="flex min-h-screen bg-[#151A23]">
+        <Sidebar />
+        <main className="flex-1 p-10">
+          <div className="animate-pulse">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="h-8 w-64 bg-[#181F2A] rounded-lg mb-2"></div>
+                <div className="h-4 w-96 bg-[#181F2A] rounded-lg"></div>
+              </div>
+              <div className="flex gap-3">
+                <div className="h-10 w-24 bg-[#181F2A] rounded-lg"></div>
+                <div className="h-10 w-24 bg-[#181F2A] rounded-lg"></div>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md mb-8">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 rounded-full bg-[#232B3B]"></div>
+                <div className="flex-1">
+                  <div className="h-6 w-48 bg-[#232B3B] rounded mb-2"></div>
+                  <div className="h-4 w-32 bg-[#232B3B] rounded"></div>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="space-y-4">
+                  <div className="h-4 w-24 bg-[#232B3B] rounded"></div>
+                  <div className="h-4 w-full bg-[#232B3B] rounded"></div>
+                  <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
+                </div>
+                <div className="space-y-4">
+                  <div className="h-4 w-24 bg-[#232B3B] rounded"></div>
+                  <div className="h-4 w-full bg-[#232B3B] rounded"></div>
+                  <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="h-4 w-24 bg-[#232B3B] rounded"></div>
+                <div className="h-4 w-full bg-[#232B3B] rounded"></div>
+                <div className="h-4 w-full bg-[#232B3B] rounded"></div>
+                <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+              <div className="h-6 w-48 bg-[#232B3B] rounded mb-6"></div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, idx) => (
+                  <div key={idx} className="flex items-center gap-4 bg-[#232B3B] rounded-lg p-4">
+                    <div className="w-12 h-12 rounded-full bg-[#181F2A]"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-32 bg-[#181F2A] rounded mb-2"></div>
+                      <div className="h-3 w-24 bg-[#181F2A] rounded"></div>
+                    </div>
+                    <div className="h-4 w-20 bg-[#181F2A] rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   // Badge para fase
   const badge = job.phase ? (
