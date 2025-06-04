@@ -131,8 +131,37 @@ export default function HomePage() {
       <div className="flex min-h-screen bg-[#151A23]">
         <Sidebar />
         <main className="flex-1 p-10">
-          <div className="flex items-center justify-center h-full">
-            <div className="text-white">Loading...</div>
+          <div className="animate-pulse">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="h-8 w-64 bg-[#181F2A] rounded-lg mb-2"></div>
+                <div className="h-4 w-96 bg-[#181F2A] rounded-lg"></div>
+              </div>
+              <div className="h-10 w-32 bg-[#181F2A] rounded-lg"></div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+              {[...Array(6)].map((_, idx) => (
+                <div key={idx} className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-full bg-[#232B3B]"></div>
+                    <div className="flex-1">
+                      <div className="h-4 w-32 bg-[#232B3B] rounded mb-2"></div>
+                      <div className="h-3 w-24 bg-[#232B3B] rounded"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="h-4 w-full bg-[#232B3B] rounded"></div>
+                    <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
+                    <div className="h-4 w-1/2 bg-[#232B3B] rounded"></div>
+                  </div>
+                  <div className="flex gap-2 mt-4">
+                    <div className="h-6 w-20 bg-[#232B3B] rounded"></div>
+                    <div className="h-6 w-20 bg-[#232B3B] rounded"></div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </main>
       </div>

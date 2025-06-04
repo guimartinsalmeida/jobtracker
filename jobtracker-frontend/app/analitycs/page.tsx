@@ -65,7 +65,51 @@ export default function AnalyticsPage() {
       <div className="flex min-h-screen bg-[#151A23]">
         <Sidebar />
         <main className="flex-1 p-10">
-          <div className="text-white">Loading...</div>
+          <div className="animate-pulse">
+            <div className="h-8 w-64 bg-[#181F2A] rounded-lg mb-2"></div>
+            <div className="h-4 w-96 bg-[#181F2A] rounded-lg mb-8"></div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {[...Array(4)].map((_, idx) => (
+                <div key={idx} className="rounded-xl p-6 bg-[#181F2A] flex flex-col gap-2 shadow-md">
+                  <div className="h-4 w-32 bg-[#232B3B] rounded"></div>
+                  <div className="h-8 w-16 bg-[#232B3B] rounded"></div>
+                  <div className="h-3 w-24 bg-[#232B3B] rounded"></div>
+                </div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+                <div className="h-6 w-48 bg-[#232B3B] rounded mb-4"></div>
+                <div className="flex justify-center">
+                  <div className="w-48 h-48 rounded-full bg-[#232B3B] animate-pulse"></div>
+                </div>
+              </div>
+              <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+                <div className="h-6 w-48 bg-[#232B3B] rounded mb-4"></div>
+                <div className="h-56 bg-[#232B3B] rounded"></div>
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+              <div className="h-6 w-48 bg-[#232B3B] rounded mb-4"></div>
+              <div className="space-y-4">
+                {[...Array(3)].map((_, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-[#232B3B] rounded-lg px-4 py-3">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-[#181F2A]"></div>
+                      <div>
+                        <div className="h-4 w-32 bg-[#181F2A] rounded mb-2"></div>
+                        <div className="h-3 w-24 bg-[#181F2A] rounded"></div>
+                      </div>
+                    </div>
+                    <div className="h-3 w-16 bg-[#181F2A] rounded"></div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </main>
       </div>
     );
