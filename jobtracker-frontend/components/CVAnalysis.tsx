@@ -5,7 +5,7 @@ export default function CVAnalysis() {
   return (
     <div className="min-h-screen bg-[#131A24] flex flex-col items-center py-12 px-4">
       <div className="w-full max-w-6xl">
-        <Link href="/" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+        <Link href="/home" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
           <span className="mr-2">←</span> Back to Home
         </Link>
         <h1 className="text-3xl font-bold text-white mb-2">CV Analysis</h1>
