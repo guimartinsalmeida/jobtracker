@@ -1,13 +1,11 @@
 import React from 'react';
-import Link from 'next/link';
+
 
 export default function CVAnalysis() {
   return (
-    <div className="min-h-screen bg-[#131A24] flex flex-col items-center py-12 px-4">
-      <div className="w-full max-w-6xl">
-        <Link href="/home" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
-          <span className="mr-2">←</span> Back to Home
-        </Link>
+    <div className="min-h-screen w-[90%] bg-[#131A24] flex flex-col items-center py-12 px-4">
+      <div className="w-full">
+       
         <h1 className="text-3xl font-bold text-white mb-2">CV Analysis</h1>
         <p className="text-gray-400 mb-8">Upload your CV and job description to get AI-powered insights</p>
         <div className="flex flex-col md:flex-row gap-8">
