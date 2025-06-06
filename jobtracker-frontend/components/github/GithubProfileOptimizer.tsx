@@ -1,5 +1,6 @@
 "use client"
 import React, { useState } from 'react';
+import { FaGithub } from "react-icons/fa";
 
 const dummyProfile = {
   score: 72,
@@ -27,7 +28,7 @@ const dummyProfile = {
 };
 
 const GithubProfileOptimizer: React.FC = () => {
-  const [username, setUsername] = useState('johndoe');
+  const [username, setUsername] = useState('');
   const [showAnalysis, setShowAnalysis] = useState(false);
 
   const handleAnalyze = () => {
@@ -36,18 +37,26 @@ const GithubProfileOptimizer: React.FC = () => {
 
   return (
     <div className="min-h-screen w-[98%] bg-[#151A23] flex flex-col items-center py-10 px-4">
+      {/* Plano de Otimização */}
+     
       <div className="w-full">
-        <h1 className="text-3xl font-bold text-white mb-2">GitHub Profile Optimizer</h1>
+        <h1 className="flex items-center gap-3 text-3xl font-bold text-white mb-2">
+          <FaGithub className="text-4xl text-white" />
+          GitHub Profile Optimizer
+        </h1>
         <p className="text-gray-400 mb-6">Otimize seu perfil GitHub para atrair recrutadores</p>
         {/* Input de username e botão */}
-        <div className="flex flex-col md:flex-row gap-4 mb-8 w-full max-w-2xl">
-          <input
-            type="text"
-            className="flex-1 bg-[#232B3B] text-white px-4 py-3 rounded-lg outline-none border-none"
-            placeholder="Digite seu usuário do GitHub"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-          />
+        <div className="flex flex-col md:flex-row gap-4 mb-8 w-full">
+          <div className="relative flex-1">
+            <FaGithub className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl pointer-events-none" />
+            <input
+              type="text"
+              className="flex-1 bg-[#232B3B] text-white pl-10 w-full pr-4 py-3 rounded-lg outline-none border-none"
+              placeholder="Digite seu usuário do GitHub"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+            />
+          </div>
           <button
             className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition"
             onClick={handleAnalyze}
@@ -57,7 +66,9 @@ const GithubProfileOptimizer: React.FC = () => {
         </div>
         {/* Cards de análise */}
         {showAnalysis && (
-          <div className="flex flex-col md:flex-row gap-8 mb-10 w-full">
+<div>
+<div className="flex flex-col md:flex-row gap-8 mb-10 w-full">
+            
             {/* Profile Score */}
             <div className="flex-1 bg-[#1A2232] rounded-2xl p-8 shadow-lg flex flex-col items-center justify-center min-h-[200px]">
               <div className="text-lg text-gray-400 mb-2">Profile Score</div>
@@ -116,10 +127,7 @@ const GithubProfileOptimizer: React.FC = () => {
               ))}
             </div>
           </div>
-        )}
-        {/* Análise dos Principais Repositórios */}
-        {showAnalysis && (
-          <div className="bg-[#1A2232] rounded-2xl p-8 shadow-lg w-full mt-4">
+            <div className="bg-[#1A2232] rounded-2xl p-8 shadow-lg w-full mb-10 mt-4">
             <h2 className="text-2xl font-bold text-white mb-2">Análise dos Principais Repositórios</h2>
             <p className="text-gray-400 mb-4">Como melhorar seus repositórios mais importantes</p>
             <div className="flex flex-col md:flex-row gap-6">
@@ -140,6 +148,74 @@ const GithubProfileOptimizer: React.FC = () => {
               </div>
             </div>
           </div>
+
+</div>
+          
+        )}
+        {/* Análise dos Principais Repositórios */}
+        {showAnalysis && (
+<div className="w-full mb-10">
+        <div className="bg-[#202736] rounded-2xl p-6 md:p-10 shadow-lg mb-8">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Plano de Otimização</h2>
+          <p className="text-gray-400 mb-6">Ações recomendadas para melhorar seu perfil</p>
+
+          {/* Seções do Plano */}
+          <div className="flex flex-col gap-6">
+            {/* Profile Optimization */}
+            <div className="bg-[#232B3B] rounded-xl p-6 relative">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-bold text-white">Profile Optimization</h3>
+                <span className="bg-red-700 text-white text-xs font-semibold px-3 py-1 rounded-full">High Priority</span>
+              </div>
+              <ul className="space-y-2 mt-2">
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Adicionar bio profissional com suas especialidades</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Incluir link para portfolio/website</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Adicionar localização e disponibilidade para trabalho</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Usar foto profissional como avatar</li>
+              </ul>
+            </div>
+            {/* Repository Quality */}
+            <div className="bg-[#232B3B] rounded-xl p-6 relative">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-bold text-white">Repository Quality</h3>
+                <span className="bg-red-700 text-white text-xs font-semibold px-3 py-1 rounded-full">High Priority</span>
+              </div>
+              <ul className="space-y-2 mt-2">
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Criar READMEs detalhados para top 5 repositórios</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Adicionar badges de build status e coverage</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Incluir demos/screenshots dos projetos</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Organizar código com estrutura clara</li>
+              </ul>
+            </div>
+            {/* Showcase Projects */}
+            <div className="bg-[#232B3B] rounded-xl p-6 relative">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-bold text-white">Showcase Projects</h3>
+                <span className="bg-yellow-700 text-yellow-200 text-xs font-semibold px-3 py-1 rounded-full">Medium Priority</span>
+              </div>
+              <ul className="space-y-2 mt-2">
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Pin 6 repositórios que demonstram suas skills</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Criar um projeto full-stack completo</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Contribuir para projetos open source populares</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Adicionar documentação técnica detalhada</li>
+              </ul>
+            </div>
+            {/* Community Engagement */}
+            <div className="bg-[#232B3B] rounded-xl p-6 relative">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-bold text-white">Community Engagement</h3>
+                <span className="bg-yellow-700 text-yellow-200 text-xs font-semibold px-3 py-1 rounded-full">Medium Priority</span>
+              </div>
+              <ul className="space-y-2 mt-2">
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Participar de discussões em issues e PRs</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Ajudar a revisar PRs de outros</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Compartilhar conhecimento em fóruns</li>
+                <li className="flex items-center gap-2 text-gray-200"><input type="checkbox" className="accent-purple-600" disabled />Participar de eventos ou hackathons</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
         )}
       </div>
     </div>
