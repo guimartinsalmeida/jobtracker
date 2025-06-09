@@ -75,6 +75,74 @@ export default function CVAnalysis() {
     setJobDescription(analysis.jobDescription);
   };
 
+  const exportAsPDF = async () => {
+    if (!analysisResult) return;
+    
+    try {
+      const response = await fetch('/api/export-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: analysisResult.optimizedCV }),
+      });
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `optimized-cv-${new Date().toISOString()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Failed to export PDF. Please try again.');
+    }
+  };
+
+  const exportAsTXT = () => {
+    if (!analysisResult) return;
+    
+    const blob = new Blob([analysisResult.optimizedCV], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `optimized-cv-${new Date().toISOString()}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  const exportAsDOCX = async () => {
+    if (!analysisResult) return;
+    
+    try {
+      const response = await fetch('/api/export-docx', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ content: analysisResult.optimizedCV }),
+      });
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `optimized-cv-${new Date().toISOString()}.docx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error exporting DOCX:', error);
+      alert('Failed to export DOCX. Please try again.');
+    }
+  };
+
   return (
     <div className="min-h-screen w-[90%] bg-[#131A24] flex flex-col items-center py-12 px-4">
       <div className="w-full max-w-7xl">
@@ -177,19 +245,51 @@ export default function CVAnalysis() {
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <span className="text-blue-400">✨</span> Optimized CV
               </h2>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(analysisResult.optimizedCV);
-                  alert('CV copied to clipboard!');
-                }}
-                className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                </svg>
-                Copy
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={exportAsPDF}
+                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
+                  title="Export as PDF"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                  </svg>
+                  PDF
+                </button>
+                <button
+                  onClick={exportAsDOCX}
+                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
+                  title="Export as DOCX"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                  </svg>
+                  DOCX
+                </button>
+                <button
+                  onClick={exportAsTXT}
+                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
+                  title="Export as TXT"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
+                  </svg>
+                  TXT
+                </button>
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(analysisResult.optimizedCV);
+                    alert('CV copied to clipboard!');
+                  }}
+                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                  </svg>
+                  Copy
+                </button>
+              </div>
             </div>
             <div className="bg-[#232B3B] rounded-lg p-6 border border-[#2A3344] hover:border-blue-500/50 transition-all duration-300">
               <pre className="text-gray-200 whitespace-pre-wrap font-sans leading-relaxed">{analysisResult.optimizedCV}</pre>
