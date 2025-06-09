@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 
 interface AnalysisResult {
   optimizedCV: string;
+  timestamp: string;
+  jobDescription: string;
 }
 
 export default function CVAnalysis() {
@@ -10,6 +12,7 @@ export default function CVAnalysis() {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [analysisHistory, setAnalysisHistory] = useState<AnalysisResult[]>([]);
 
   const analyzeCV = async () => {
     if (!cvText || !jobDescription) {
@@ -51,13 +54,25 @@ export default function CVAnalysis() {
 
       if (!reply) throw new Error('No response from AI.');
 
-      setAnalysisResult({ optimizedCV: reply });
+      const newAnalysis = {
+        optimizedCV: reply,
+        timestamp: new Date().toISOString(),
+        jobDescription: jobDescription
+      };
+
+      setAnalysisResult(newAnalysis);
+      setAnalysisHistory(prev => [newAnalysis, ...prev]);
     } catch (error) {
       console.error(error);
       setError('Failed to analyze CV. Please try again.');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const loadPreviousAnalysis = (analysis: AnalysisResult) => {
+    setAnalysisResult(analysis);
+    setJobDescription(analysis.jobDescription);
   };
 
   return (
@@ -115,6 +130,45 @@ export default function CVAnalysis() {
             </button>
           </div>
         </div>
+
+        {/* Analysis History */}
+        {analysisHistory.length > 0 && (
+          <div className="mt-8 bg-[#1A2232] rounded-xl p-6 shadow-lg border border-[#2A3344]">
+            <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
+              <span className="text-blue-400">📚</span> Analysis History
+            </h2>
+            <div className="space-y-4">
+              {analysisHistory.map((analysis, index) => (
+                <div
+                  key={index}
+                  className="bg-[#232B3B] rounded-lg p-4 border border-[#2A3344] hover:border-blue-500/50 transition-all duration-300 cursor-pointer"
+                  onClick={() => loadPreviousAnalysis(analysis)}
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="text-gray-200">
+                      <p className="font-medium">Analysis from {new Date(analysis.timestamp).toLocaleString()}</p>
+                      <p className="text-sm text-gray-400 mt-1 line-clamp-2">{analysis.jobDescription}</p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigator.clipboard.writeText(analysis.optimizedCV);
+                        alert('CV copied to clipboard!');
+                      }}
+                      className="bg-[#2A3344] hover:bg-[#3A4354] text-gray-200 px-3 py-1 rounded-lg flex items-center gap-2 transition-all duration-300"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                      </svg>
+                      Copy
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Optimized CV Result */}
         {analysisResult && (
