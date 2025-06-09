@@ -6,6 +6,12 @@ interface AnalysisResult {
   jobDescription: string;
 }
 
+interface CompatibilityAnalysis {
+  matchPercentage: number;
+  matchedKeywords: string[];
+  missingKeywords: string[];
+}
+
 export default function CVAnalysis() {
   const [cvText, setCvText] = useState('');
   const [jobDescription, setJobDescription] = useState('');
@@ -13,6 +19,42 @@ export default function CVAnalysis() {
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [analysisHistory, setAnalysisHistory] = useState<AnalysisResult[]>([]);
+  const [compatibilityAnalysis, setCompatibilityAnalysis] = useState<CompatibilityAnalysis | null>(null);
+  const [showCompatibility, setShowCompatibility] = useState(false);
+
+  // Function to extract keywords from text
+  const extractKeywords = (text: string): string[] => {
+    const words = text.toLowerCase()
+      .replace(/[^\w\s]/g, '')
+      .split(/\s+/)
+      .filter(word => word.length > 3); // Filter out short words
+    
+    // Remove common words
+    const commonWords = new Set(['the', 'and', 'that', 'have', 'with', 'this', 'from', 'your', 'will', 'would', 'should', 'could', 'must', 'need', 'want', 'make', 'made', 'making', 'work', 'working', 'worked']);
+    return [...new Set(words.filter(word => !commonWords.has(word)))];
+  };
+
+  // Function to analyze compatibility
+  const analyzeCompatibility = (cv: string, jd: string): CompatibilityAnalysis => {
+    const cvKeywords = extractKeywords(cv);
+    const jdKeywords = extractKeywords(jd);
+    
+    const matchedKeywords = jdKeywords.filter(keyword => 
+      cvKeywords.some(cvKeyword => cvKeyword.includes(keyword) || keyword.includes(cvKeyword))
+    );
+    
+    const missingKeywords = jdKeywords.filter(keyword => 
+      !matchedKeywords.includes(keyword)
+    );
+    
+    const matchPercentage = Math.round((matchedKeywords.length / jdKeywords.length) * 100);
+    
+    return {
+      matchPercentage,
+      matchedKeywords,
+      missingKeywords
+    };
+  };
 
   const analyzeCV = async () => {
     if (!cvText || !jobDescription) {
@@ -24,6 +66,7 @@ export default function CVAnalysis() {
     setIsLoading(true);
     setError(null);
     setAnalysisResult(null);
+    setShowCompatibility(false);
 
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
@@ -62,6 +105,10 @@ export default function CVAnalysis() {
 
       setAnalysisResult(newAnalysis);
       setAnalysisHistory(prev => [newAnalysis, ...prev]);
+      // Calculate compatibility only after analysis
+      const analysis = analyzeCompatibility(cvText, jobDescription);
+      setCompatibilityAnalysis(analysis);
+      setShowCompatibility(true);
     } catch (error) {
       console.error(error);
       setError('Failed to analyze CV. Please try again.');
@@ -176,6 +223,55 @@ export default function CVAnalysis() {
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
             />
+
+            {/* Compatibility Analysis */}
+            {showCompatibility && compatibilityAnalysis &&
+              compatibilityAnalysis.matchPercentage > 0 &&
+              !isNaN(compatibilityAnalysis.matchPercentage) && (
+              <div className="mb-4 bg-[#232B3B] rounded-lg p-4 border border-[#2A3344]">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-white font-medium">Compatibility Analysis</h3>
+                  <div className="flex items-center gap-2">
+                    <div className="text-2xl font-bold" style={{
+                      color: compatibilityAnalysis.matchPercentage >= 70 ? '#4ade80' :
+                             compatibilityAnalysis.matchPercentage >= 40 ? '#fbbf24' : '#f87171'
+                    }}>
+                      {compatibilityAnalysis.matchPercentage}%
+                    </div>
+                  </div>
+                </div>
+                {compatibilityAnalysis.matchedKeywords.length > 0 && (
+                  <div className="mb-2">
+                    <p className="text-sm text-gray-400 mb-1">Matched Keywords:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {compatibilityAnalysis.matchedKeywords.map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-sm"
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {compatibilityAnalysis.missingKeywords.length > 0 && (
+                  <div>
+                    <p className="text-sm text-gray-400 mb-1">Missing Keywords:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {compatibilityAnalysis.missingKeywords.map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="px-2 py-1 bg-red-500/20 text-red-400 rounded-md text-sm"
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             <button
               className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg py-3 flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
