@@ -149,7 +149,22 @@ const InterviewAnalysis: React.FC = () => {
 
   return (
     <div className="min-h-screen w-[98%] bg-[#151A23] flex flex-col items-center py-10 px-4">
-      <div className='w-full'>
+      <div className='w-full relative'>
+        {/* Coming Soon Overlay */}
+        <div className="absolute inset-0 bg-[#151A23]/90 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-bounce mb-4">
+              <svg className="w-16 h-16 text-blue-500 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+              </svg>
+            </div>
+            <h2 className="text-4xl font-bold text-white mb-4">Coming Soon!</h2>
+            <p className="text-gray-300 text-lg max-w-md mx-auto">
+              We&apos;re working hard to bring you AI-powered interview analysis. Stay tuned for this exciting feature!
+            </p>
+          </div>
+        </div>
+
         <h1 className="text-3xl font-bold text-white mb-2">Interview Analysis</h1>
         <p className="text-gray-400 mb-6">Upload your interview video to get AI-powered feedback and improvement suggestions</p>
         <div className="w-full  flex flex-col md:flex-row gap-8">
