@@ -194,211 +194,161 @@ export default function CVAnalysis() {
     <div className="min-h-screen w-[90%] bg-[#131A24] flex flex-col items-center py-12 px-4">
       <div className="w-full max-w-7xl">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">CV Optimizer with AI</h1>
-          <p className="text-gray-400 text-lg">Paste your CV and JD to receive a customized CV optimized for the job.</p>
+          <h1 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent animate-fadeIn">
+            CV Optimizer with AI
+          </h1>
+          <p className="text-gray-400 text-lg animate-fadeIn" style={{ animationDelay: '0.2s' }}>
+            Paste your CV and JD to receive a customized CV optimized for the job.
+          </p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8">
-          {/* CV Input */}
-          <div className="flex-1 bg-[#1A2232] rounded-xl p-6 shadow-lg flex flex-col border border-[#2A3344] hover:border-blue-500/50 transition-all duration-300">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <span className="text-blue-400">📄</span> Your CV
-            </h2>
-            <textarea
-              className="bg-[#232B3B] text-gray-200 rounded-lg p-4 h-56 resize-none mb-4 border border-[#2A3344] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300"
-              placeholder="Paste your CV content here..."
-              value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
-            />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div className="space-y-4">
+            <div className="relative group">
+              <label className="block text-white text-sm font-medium mb-2">Your CV</label>
+              <textarea
+                value={cvText}
+                onChange={(e) => setCvText(e.target.value)}
+                className="w-full h-64 p-4 bg-[#1E2536] text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300 resize-none"
+                placeholder="Paste your CV here..."
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg pointer-events-none" />
+            </div>
           </div>
 
-          {/* JD Input */}
-          <div className="flex-1 bg-[#1A2232] rounded-xl p-6 shadow-lg flex flex-col border border-[#2A3344] hover:border-blue-500/50 transition-all duration-300">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <span className="text-blue-400">📋</span> Job Description
-            </h2>
-            <textarea
-              className="bg-[#232B3B] text-gray-200 rounded-lg p-4 h-56 resize-none mb-4 border border-[#2A3344] focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all duration-300"
-              placeholder="Paste job description here..."
-              value={jobDescription}
-              onChange={(e) => setJobDescription(e.target.value)}
-            />
+          <div className="space-y-4">
+            <div className="relative group">
+              <label className="block text-white text-sm font-medium mb-2">Job Description</label>
+              <textarea
+                value={jobDescription}
+                onChange={(e) => setJobDescription(e.target.value)}
+                className="w-full h-64 p-4 bg-[#1E2536] text-white rounded-lg border border-gray-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500 transition-all duration-300 resize-none"
+                placeholder="Paste the job description here..."
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg pointer-events-none" />
+            </div>
+          </div>
+        </div>
 
-            {/* Compatibility Analysis */}
-            {showCompatibility && compatibilityAnalysis &&
-              compatibilityAnalysis.matchPercentage > 0 &&
-              !isNaN(compatibilityAnalysis.matchPercentage) && (
-              <div className="mb-4 bg-[#232B3B] rounded-lg p-4 border border-[#2A3344]">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-white font-medium">Compatibility Analysis</h3>
-                  <div className="flex items-center gap-2">
-                    <div className="text-2xl font-bold" style={{
-                      color: compatibilityAnalysis.matchPercentage >= 70 ? '#4ade80' :
-                             compatibilityAnalysis.matchPercentage >= 40 ? '#fbbf24' : '#f87171'
-                    }}>
-                      {compatibilityAnalysis.matchPercentage}%
-                    </div>
-                  </div>
-                </div>
-                {compatibilityAnalysis.matchedKeywords.length > 0 && (
-                  <div className="mb-2">
-                    <p className="text-sm text-gray-400 mb-1">Matched Keywords:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {compatibilityAnalysis.matchedKeywords.map((keyword, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-sm"
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {compatibilityAnalysis.missingKeywords.length > 0 && (
-                  <div>
-                    <p className="text-sm text-gray-400 mb-1">Missing Keywords:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {compatibilityAnalysis.missingKeywords.map((keyword, index) => (
-                        <span
-                          key={index}
-                          className="px-2 py-1 bg-red-500/20 text-red-400 rounded-md text-sm"
-                        >
-                          {keyword}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
+        <div className="flex justify-center mb-8">
+          <button
+            onClick={analyzeCV}
+            disabled={isLoading}
+            className={`px-8 py-3 rounded-lg font-medium text-white transition-all duration-300 transform hover:scale-105 ${
+              isLoading
+                ? 'bg-gray-600 cursor-not-allowed'
+                : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
+            }`}
+          >
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>Analyzing...</span>
               </div>
+            ) : (
+              'Analyze CV'
             )}
-
-            <button
-              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg py-3 flex items-center justify-center gap-2 hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
-              onClick={analyzeCV}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Optimizing...
-                </>
-              ) : (
-                <>
-                  <span className="text-xl">🤖</span> Optimize CV
-                </>
-              )}
-            </button>
-          </div>
+          </button>
         </div>
 
-        {/* Analysis History */}
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-500 px-4 py-3 rounded-lg mb-8 animate-fadeIn">
+            {error}
+          </div>
+        )}
+
+        {showCompatibility && compatibilityAnalysis && (
+          <div className="mb-8 p-6 bg-[#1E2536] rounded-lg border border-gray-700 animate-fadeIn">
+            <h3 className="text-xl font-bold text-white mb-4">Compatibility Analysis</h3>
+            <div className="flex items-center mb-4">
+              <div className="w-full bg-gray-700 rounded-full h-4">
+                <div
+                  className="h-4 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-1000"
+                  style={{ width: `${compatibilityAnalysis.matchPercentage}%` }}
+                />
+              </div>
+              <span className="ml-4 text-white font-bold">{compatibilityAnalysis.matchPercentage}% Match</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="text-green-400 font-medium mb-2">Matched Keywords</h4>
+                <div className="flex flex-wrap gap-2">
+                  {compatibilityAnalysis.matchedKeywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="text-red-400 font-medium mb-2">Missing Keywords</h4>
+                <div className="flex flex-wrap gap-2">
+                  {compatibilityAnalysis.missingKeywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-sm"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {analysisResult && (
+          <div className="space-y-6 animate-fadeIn">
+            <div className="bg-[#1E2536] p-6 rounded-lg border border-gray-700">
+              <h3 className="text-xl font-bold text-white mb-4">Optimized CV</h3>
+              <div className="prose prose-invert max-w-none">
+                <pre className="whitespace-pre-wrap text-gray-300">{analysisResult.optimizedCV}</pre>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4 justify-center">
+              <button
+                onClick={exportAsPDF}
+                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-300"
+              >
+                Export as PDF
+              </button>
+              <button
+                onClick={exportAsTXT}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-300"
+              >
+                Export as TXT
+              </button>
+              <button
+                onClick={exportAsDOCX}
+                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-300"
+              >
+                Export as DOCX
+              </button>
+            </div>
+          </div>
+        )}
+
         {analysisHistory.length > 0 && (
-          <div className="mt-8 bg-[#1A2232] rounded-xl p-6 shadow-lg border border-[#2A3344]">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-4">
-              <span className="text-blue-400">📚</span> Analysis History
-            </h2>
-            <div className="space-y-4">
+          <div className="mt-12 animate-fadeIn">
+            <h3 className="text-xl font-bold text-white mb-4">Analysis History</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {analysisHistory.map((analysis, index) => (
                 <div
                   key={index}
-                  className="bg-[#232B3B] rounded-lg p-4 border border-[#2A3344] hover:border-blue-500/50 transition-all duration-300 cursor-pointer"
                   onClick={() => loadPreviousAnalysis(analysis)}
+                  className="bg-[#1E2536] p-4 rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500 transition-all duration-300"
                 >
-                  <div className="flex justify-between items-center">
-                    <div className="text-gray-200">
-                      <p className="font-medium">Analysis from {new Date(analysis.timestamp).toLocaleString()}</p>
-                      <p className="text-sm text-gray-400 mt-1 line-clamp-2">{analysis.jobDescription}</p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigator.clipboard.writeText(analysis.optimizedCV);
-                        alert('CV copied to clipboard!');
-                      }}
-                      className="bg-[#2A3344] hover:bg-[#3A4354] text-gray-200 px-3 py-1 rounded-lg flex items-center gap-2 transition-all duration-300"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                        <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                      </svg>
-                      Copy
-                    </button>
-                  </div>
+                  <p className="text-gray-400 text-sm mb-2">
+                    {new Date(analysis.timestamp).toLocaleString()}
+                  </p>
+                  <p className="text-white line-clamp-2">{analysis.jobDescription}</p>
                 </div>
               ))}
             </div>
-          </div>
-        )}
-
-        {/* Optimized CV Result */}
-        {analysisResult && (
-          <div className="mt-8 bg-[#1A2232] rounded-xl p-6 shadow-lg border border-[#2A3344] animate-fadeIn">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                <span className="text-blue-400">✨</span> Optimized CV
-              </h2>
-              <div className="flex gap-2">
-                <button
-                  onClick={exportAsPDF}
-                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
-                  title="Export as PDF"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                  </svg>
-                  PDF
-                </button>
-                <button
-                  onClick={exportAsDOCX}
-                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
-                  title="Export as DOCX"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                  </svg>
-                  DOCX
-                </button>
-                <button
-                  onClick={exportAsTXT}
-                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
-                  title="Export as TXT"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clipRule="evenodd" />
-                  </svg>
-                  TXT
-                </button>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(analysisResult.optimizedCV);
-                    alert('CV copied to clipboard!');
-                  }}
-                  className="bg-[#232B3B] hover:bg-[#2A3344] text-gray-200 px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 hover:scale-105 active:scale-95"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                    <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                  </svg>
-                  Copy
-                </button>
-              </div>
-            </div>
-            <div className="bg-[#232B3B] rounded-lg p-6 border border-[#2A3344] hover:border-blue-500/50 transition-all duration-300">
-              <pre className="text-gray-200 whitespace-pre-wrap font-sans leading-relaxed">{analysisResult.optimizedCV}</pre>
-            </div>
-          </div>
-        )}
-
-        {error && (
-          <div className="mt-4 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg font-medium flex items-center gap-2 animate-shake">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-            </svg>
-            {error}
           </div>
         )}
       </div>
