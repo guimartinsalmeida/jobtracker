@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 
 interface JobDetail {
@@ -32,36 +32,30 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
 
-export default function JobDetailPage({ params }: { params: { id: string } }) {
+export default function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const { id } = use(params);
   const [job, setJob] = useState<JobDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [showPdfPreview, setShowPdfPreview] = useState(false);
-  const [selectedPdfUrl, setSelectedPdfUrl] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (params.id) {
-      fetch(`${API_BASE_URL}/api/jobs/${params.id}`)
+    if (id) {
+      fetch(`${API_BASE_URL}/api/jobs/${id}`)
         .then(res => res.json())
         .then(data => {
           setJob(data);
           setLoading(false);
         });
     }
-  }, [params.id]);
-
-  const handlePdfClick = (url: string) => {
-    setSelectedPdfUrl(`${API_BASE_URL}${url}`);
-    setShowPdfPreview(true);
-  };
+  }, [id]);
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
-      const response = await fetch(`${API_BASE_URL}/api/jobs/${params.id}`, {
+      const response = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -231,46 +225,6 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
         </div>
       )}
 
-      {/* PDF Preview Modal */}
-      {showPdfPreview && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-[#232B3B] rounded-lg w-full max-w-4xl h-[90vh] flex flex-col">
-            <div className="flex justify-between items-center p-4 border-b border-gray-700">
-              <h3 className="text-lg font-semibold">PDF Preview</h3>
-              <div className="flex gap-2">
-                <a
-                  href={selectedPdfUrl}
-                  download
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white font-medium flex items-center gap-2"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                  </svg>
-                  Download
-                </a>
-                <button
-                  onClick={() => setShowPdfPreview(false)}
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded text-white font-medium"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 p-4 overflow-hidden">
-              <object
-                data={selectedPdfUrl}
-                type="application/pdf"
-                className="w-full h-full rounded"
-              >
-                <div className="flex items-center justify-center h-full text-gray-400">
-                  <p>Unable to display PDF file. <a href={selectedPdfUrl} className="text-blue-400 hover:underline">Download</a> instead.</p>
-                </div>
-              </object>
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="max-w-6xl mx-auto">
         {/* Botões Edit e Delete no topo */}
         <div className="flex justify-end gap-3">
@@ -313,30 +267,37 @@ export default function JobDetailPage({ params }: { params: { id: string } }) {
           </div>
           {/* Files */}
           <div className="bg-[#232B3B] rounded-2xl p-6 flex-1 min-w-[250px] shadow border border-[#232B3B]">
-            <div className="font-semibold text-lg mb-3">Files</div>
-            <div className="flex flex-col gap-2">
-              {files.length === 0 && <span className="text-gray-500">No files uploaded</span>}
-              {files.map(file => (
-                <div key={file.name} className="flex items-center justify-between bg-[#181C23] rounded px-3 py-2">
-                  <span className="truncate max-w-[120px] md:max-w-[180px]">{file.name}</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handlePdfClick(file.url)}
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      👁️
-                    </button>
-                    <a
-                      href={file.url}
-                      download
-                      className="text-blue-400 hover:text-blue-300"
-                    >
-                      ⬇️
-                    </a>
-                  </div>
+            <div className="font-semibold text-lg mb-6 flex items-center gap-3">
+              <span className="text-blue-400 text-3xl">📄</span>
+              <span className="text-2xl font-bold">Files</span>
+            </div>
+            <div className="flex flex-col items-center justify-center">
+              {files.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
+                  <span className="text-5xl mb-2">📂</span>
+                  <span>No files uploaded yet</span>
                 </div>
-              ))}
-              <button className="mt-2 px-3 py-1 bg-[#232B3B] border border-gray-600 rounded text-gray-400 hover:bg-[#181C23]">+ Add New File</button>
+              ) : (
+                <div className="bg-[#181C23] rounded-xl px-8 py-8 flex flex-col items-center shadow-lg w-full max-w-xs mx-auto">
+                  <span className="text-6xl mb-4 text-blue-400">📄</span>
+                  <a
+                    href={files[0].url}
+                    download
+                    className="flex items-center gap-2 px-4 py-1 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-bold text-sm shadow transition"
+                    title="Download CV"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 10l5 5 5-5"/>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15V3"/>
+                    </svg>
+                    Used CV
+                  </a>
+                  <span className="text-gray-400 text-sm mt-4 text-center">
+                    This is the CV used for this job.
+                  </span>
+                </div>
+              )}
             </div>
           </div>
           {/* Timeline */}
