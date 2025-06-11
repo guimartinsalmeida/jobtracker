@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FaInfoCircle, FaClipboardList, FaFileAlt, FaRegStickyNote } from 'react-icons/fa';
 
 interface JobFormData {
@@ -20,9 +20,10 @@ interface JobFormData {
 interface JobFormProps {
   onSubmit: (data: JobFormData | FormData) => void;
   onCancel: () => void;
+  initialData?: JobFormData;
 }
 
-export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
+export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProps) {
   const [form, setForm] = useState<JobFormData>({
     job_title: '',
     company_name: '',
@@ -41,6 +42,12 @@ export default function JobForm({ onSubmit, onCancel }: JobFormProps) {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialData) {
+      setForm(initialData);
+    }
+  }, [initialData]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

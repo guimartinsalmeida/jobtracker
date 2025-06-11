@@ -109,22 +109,39 @@ export const getJobsByUserId = async (req, res) => {
 
 // 🔸 Uptade job
 export const updateJob = async (req, res) => {
-  const { id } = req.params
-  const jobData = req.body
-
   try {
-    const updatedJob = await updateJobService(id, jobData)
+    // Handle file upload
+    upload.single('cv_file')(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
 
-    if (!updatedJob) {
-      return res.status(404).json({ message: 'Job not found or update failed' })
-    }
+      const { id } = req.params;
+      const jobData = { ...req.body };
+      
+      // Get the file path if a file was uploaded
+      if (req.file) {
+        jobData.cv_file_url = `/uploads/${req.file.filename}`;
+      }
 
-    res.status(200).json({ message: 'Job updated', job: updatedJob })
+      try {
+        const updatedJob = await updateJobService(id, jobData);
+
+        if (!updatedJob) {
+          return res.status(404).json({ message: 'Job not found or update failed' });
+        }
+
+        res.status(200).json({ message: 'Job updated', job: updatedJob });
+      } catch (error) {
+        console.error('Error updating job:', error);
+        res.status(500).json({ message: 'Internal server error' });
+      }
+    });
   } catch (error) {
-    console.error('Error updating job:', error)
-    res.status(500).json({ message: 'Internal server error' })
+    console.error('Error in file upload:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
-}
+};
 
 // 🔸 Delete job
 export const deleteJob = async (req, res) => {

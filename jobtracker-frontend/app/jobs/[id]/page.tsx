@@ -36,29 +36,55 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   const router = useRouter();
   const { id } = use(params);
   const [job, setJob] = useState<JobDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (id) {
-      fetch(`${API_BASE_URL}/api/jobs/${id}`)
-        .then(res => res.json())
-        .then(data => {
-          setJob(data);
-          setLoading(false);
+    const fetchJob = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          router.push('/auth/login');
+          return;
+        }
+
+        const response = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
-    }
-  }, [id]);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch job');
+        }
+
+        const data = await response.json();
+        setJob(data);
+      } catch (error) {
+        console.error('Error fetching job:', error);
+        router.push('/home');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJob();
+  }, [id, router]);
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        router.push('/auth/login');
+        return;
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/jobs/${id}`, {
         method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -76,70 +102,22 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
     }
   };
 
-  if (loading || !job) {
+  if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-[#151A23]">
-        <Sidebar />
-        <main className="flex-1 p-10">
-          <div className="animate-pulse">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="h-8 w-64 bg-[#181F2A] rounded-lg mb-2"></div>
-                <div className="h-4 w-96 bg-[#181F2A] rounded-lg"></div>
-              </div>
-              <div className="flex gap-3">
-                <div className="h-10 w-24 bg-[#181F2A] rounded-lg"></div>
-                <div className="h-10 w-24 bg-[#181F2A] rounded-lg"></div>
-              </div>
-            </div>
+      <div className="min-h-screen bg-[#181C23] text-white p-0 md:p-8">
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    );
+  }
 
-            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md mb-8">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 rounded-full bg-[#232B3B]"></div>
-                <div className="flex-1">
-                  <div className="h-6 w-48 bg-[#232B3B] rounded mb-2"></div>
-                  <div className="h-4 w-32 bg-[#232B3B] rounded"></div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                <div className="space-y-4">
-                  <div className="h-4 w-24 bg-[#232B3B] rounded"></div>
-                  <div className="h-4 w-full bg-[#232B3B] rounded"></div>
-                  <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
-                </div>
-                <div className="space-y-4">
-                  <div className="h-4 w-24 bg-[#232B3B] rounded"></div>
-                  <div className="h-4 w-full bg-[#232B3B] rounded"></div>
-                  <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className="h-4 w-24 bg-[#232B3B] rounded"></div>
-                <div className="h-4 w-full bg-[#232B3B] rounded"></div>
-                <div className="h-4 w-full bg-[#232B3B] rounded"></div>
-                <div className="h-4 w-3/4 bg-[#232B3B] rounded"></div>
-              </div>
-            </div>
-
-            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
-              <div className="h-6 w-48 bg-[#232B3B] rounded mb-6"></div>
-              <div className="space-y-4">
-                {[...Array(3)].map((_, idx) => (
-                  <div key={idx} className="flex items-center gap-4 bg-[#232B3B] rounded-lg p-4">
-                    <div className="w-12 h-12 rounded-full bg-[#181F2A]"></div>
-                    <div className="flex-1">
-                      <div className="h-4 w-32 bg-[#181F2A] rounded mb-2"></div>
-                      <div className="h-3 w-24 bg-[#181F2A] rounded"></div>
-                    </div>
-                    <div className="h-4 w-20 bg-[#181F2A] rounded"></div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </main>
+  if (!job) {
+    return (
+      <div className="min-h-screen bg-[#181C23] text-white p-0 md:p-8">
+        <div className="flex items-center justify-center h-screen">
+          <p className="text-xl">Job not found</p>
+        </div>
       </div>
     );
   }
@@ -181,9 +159,7 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
   // Job Description truncation logic
   const DESCRIPTION_LIMIT = 400;
   const isLongDescription = job.job_description.length > DESCRIPTION_LIMIT;
-  const descriptionToShow = showFullDescription
-    ? job.job_description
-    : job.job_description.slice(0, DESCRIPTION_LIMIT) + (isLongDescription ? '...' : '');
+  const descriptionToShow = job.job_description.slice(0, DESCRIPTION_LIMIT) + (isLongDescription ? '...' : '');
 
   return (
     <div className="min-h-screen bg-[#181C23] text-white p-0 md:p-8">
@@ -228,7 +204,10 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
       <div className="max-w-6xl mx-auto">
         {/* Botões Edit e Delete no topo */}
         <div className="flex justify-end gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold shadow transition-colors duration-150">
+          <button 
+            onClick={() => router.push(`/jobs/${id}/edit`)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-semibold shadow transition-colors duration-150"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487a2.1 2.1 0 1 1 2.97 2.97L7.5 19.79l-4 1 1-4 13.362-13.303z" />
             </svg>
@@ -326,9 +305,9 @@ export default function JobDetailPage({ params }: { params: Promise<{ id: string
           {isLongDescription && (
             <button
               className="text-blue-400 hover:underline text-sm font-semibold mb-2"
-              onClick={() => setShowFullDescription(v => !v)}
+              onClick={() => router.push(`/jobs/${id}/edit`)}
             >
-              {showFullDescription ? 'Ver menos' : 'Ver mais'}
+              Edit Job Description
             </button>
           )}
         </div>
