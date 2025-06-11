@@ -24,7 +24,10 @@ app.use(express.json())
 app.use(cors({
   origin: ['http://localhost:3000', 'https://jobtracker-production.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }))
 
 
