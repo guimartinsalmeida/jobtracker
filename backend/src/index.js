@@ -10,6 +10,7 @@ import resumeAnalysisRoutes from './routes/resumeAnalysisRoutes.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import analyticsRoutes from './routes/analyticsRoutes.js'
+import axios from 'axios'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,11 +25,9 @@ app.use(express.json())
 app.use(cors({
   origin: ['http://localhost:3000', 'https://jobtracker-production.up.railway.app'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  credentials: true // corresponde ao withCredentials
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin']
 }));
-
-
-app.options('*', cors());
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
@@ -50,3 +49,5 @@ app.get('/', async(req, res) =>{
 app.listen(port, () =>{
    console.log(`Server is running on http://localhost:${port}`) 
 })
+
+axios.defaults.withCredentials = true;
