@@ -10,6 +10,7 @@ import Modal from '@/components/ui/Modal';
 import JobForm from '@/components/jobs/JobForm';
 import axios from 'axios';
 import { useUser } from '@/contexts/UserContext';
+import { JobFormData } from '@/components/jobs/JobForm';
 
 type Job = {
   id: number;
@@ -110,7 +111,7 @@ export default function HomePage() {
 
   const handleAddJobClick = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
-  const handleJobFormSubmit = async (data: Record<string, string>) => {
+  const handleJobFormSubmit = async (data: JobFormData | FormData) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post('http://localhost:3001/api/jobs', data, {
@@ -193,7 +194,7 @@ export default function HomePage() {
         )}
         <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
           <h2 className="text-xl font-bold mb-4 text-white">Add New Job Application</h2>
-          <JobForm onSubmit={handleJobFormSubmit} onCancel={handleCloseModal} />
+          <JobForm git onSubmit={handleJobFormSubmit} onCancel={handleCloseModal} />
         </Modal>
       </main>
     </div>

@@ -2,7 +2,6 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, use } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
 
 interface JobDetail {
   id: number;

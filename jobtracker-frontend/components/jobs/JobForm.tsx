@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { FaInfoCircle, FaClipboardList, FaFileAlt, FaRegStickyNote } from 'react-icons/fa';
 
-interface JobFormData {
+export interface JobFormData {
   job_title: string;
   company_name: string;
   location: string;
