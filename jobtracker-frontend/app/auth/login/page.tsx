@@ -15,15 +15,24 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://jobtracker-production.up.railway.app/api/auth/login', { email, password });
+      const res = await axios.post(
+        'https://jobtracker-production.up.railway.app/api/auth/login',
+        { email, password },
+        {
+          withCredentials: true, // importante para CORS mesmo sem cookies
+        }
+      );
+  
       localStorage.setItem('token', res.data.token);
       const decodedToken = jwtDecode(res.data.token) as { userId: string };
       await fetchUserData(decodedToken.userId);
       router.push('/home');
     } catch (error) {
       setError('Invalid credentials');
+      console.error(error);
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">

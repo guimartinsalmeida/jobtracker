@@ -77,7 +77,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
         return;
       }
 
-      await axios.put(`http://jobtracker-production.up.railway.app/api/jobs/${id}`, data, {
+      await axios.put(`https://jobtracker-production.up.railway.app/api/jobs/${id}`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json',
