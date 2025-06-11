@@ -44,7 +44,7 @@ export default function AnalyticsPage() {
       
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:3001/api/analytics/user/${user.id}`, {
+        const response = await axios.get(`http://jobtracker-production.up.railway.app/api/analytics/user/${user.id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

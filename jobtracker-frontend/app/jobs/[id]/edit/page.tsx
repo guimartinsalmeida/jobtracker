@@ -36,7 +36,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
           return;
         }
 
-        const response = await axios.get(`http://localhost:3001/api/jobs/${id}`, {
+        const response = await axios.get(`jobtracker-production.up.railway.app/api/jobs/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -77,7 +77,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
         return;
       }
 
-      await axios.put(`http://localhost:3001/api/jobs/${id}`, data, {
+      await axios.put(`http://jobtracker-production.up.railway.app/api/jobs/${id}`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': data instanceof FormData ? 'multipart/form-data' : 'application/json',

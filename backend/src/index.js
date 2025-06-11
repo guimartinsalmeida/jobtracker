@@ -21,7 +21,12 @@ const app = express()
 const port = process.env.PORT || 3001
 
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:3000', 'https://jobtracker-production.up.railway.app'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true
+}))
+
 
 // Serve static files from the uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')))

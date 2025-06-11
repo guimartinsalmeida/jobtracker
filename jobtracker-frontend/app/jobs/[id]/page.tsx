@@ -23,7 +23,7 @@ interface JobDetail {
   updated_at: string;
 }
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'http://jobtracker-production.up.railway.app';
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '';

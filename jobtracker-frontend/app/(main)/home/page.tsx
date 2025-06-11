@@ -63,7 +63,7 @@ export default function HomePage() {
           }
         }
 
-        const response = await axios.get(`http://localhost:3001/api/jobs/user/${user?.id}`, {
+        const response = await axios.get(`http://jobtracker-production.up.railway.app/api/jobs/user/${user?.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -114,7 +114,7 @@ export default function HomePage() {
   const handleJobFormSubmit = async (data: JobFormData | FormData) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://localhost:3001/api/jobs', data, {
+      await axios.post('http://jobtracker-production.up.railway.app/api/jobs', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -194,7 +194,7 @@ export default function HomePage() {
         )}
         <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
           <h2 className="text-xl font-bold mb-4 text-white">Add New Job Application</h2>
-          <JobForm git onSubmit={handleJobFormSubmit} onCancel={handleCloseModal} />
+          <JobForm onSubmit={handleJobFormSubmit} onCancel={handleCloseModal} />
         </Modal>
       </main>
     </div>

@@ -15,7 +15,7 @@ export default function LoginPage() {
 
   const handleLogin = async () => {
     try {
-      const res = await axios.post('http://localhost:3001/api/auth/login', { email, password });
+      const res = await axios.post('http://jobtracker-production.up.railway.app/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       const decodedToken = jwtDecode(res.data.token) as { userId: string };
       await fetchUserData(decodedToken.userId);
