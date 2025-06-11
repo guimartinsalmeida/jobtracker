@@ -2,7 +2,6 @@
 
 import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sidebar } from '@/components/layout/Sidebar';
 import JobForm from '@/components/jobs/JobForm';
 import axios from 'axios';
 
@@ -95,8 +94,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-[#151A23]">
-        <Sidebar />
-        <main className="flex-1 p-10">
+        
+        <main className="flex-1 p-10 w-full">
           <div className="flex items-center justify-center h-full">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
@@ -108,7 +107,7 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
   if (!job) {
     return (
       <div className="flex min-h-screen bg-[#151A23]">
-        <Sidebar />
+        
         <main className="flex-1 p-10">
           <div className="flex items-center justify-center h-full">
             <p className="text-white text-xl">Job not found</p>
@@ -120,9 +119,8 @@ export default function EditJobPage({ params }: { params: Promise<{ id: string }
 
   return (
     <div className="flex min-h-screen bg-[#151A23]">
-      <Sidebar />
       <main className="flex-1 p-10">
-        <div className="max-w-5xl mx-auto">
+        <div className="w-full mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-2xl font-bold text-white">Edit Job Application</h1>
             <button

@@ -92,7 +92,7 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-8 w-full max-w-5xl text-white mx-auto"
+      className="space-y-8 w-full  text-white mx-auto"
     >
       <div className="flex flex-col md:flex-row gap-1 w-full">
       <div className="flex-1 space-y-2">
