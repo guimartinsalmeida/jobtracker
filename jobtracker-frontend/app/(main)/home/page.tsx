@@ -63,7 +63,7 @@ export default function HomePage() {
           }
         }
 
-        const response = await axios.get(`https://jobtracker-production.up.railway.app/api/jobs/user/${user?.id}`, {
+        const response = await axios.get(`http://jobtracker-production.up.railway.app/api/jobs/user/${user?.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -114,7 +114,7 @@ export default function HomePage() {
   const handleJobFormSubmit = async (data: JobFormData | FormData) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('https://jobtracker-production.up.railway.app/api/jobs', data, {
+      await axios.post('http://jobtracker-production.up.railway.app/api/jobs', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

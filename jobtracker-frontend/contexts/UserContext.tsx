@@ -34,7 +34,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
         throw new Error('No token found');
       }
 
-      const response = await axios.get(`https://jobtracker-production.up.railway.app/api/users/${userId}`, {
+      const response = await axios.get(`http://jobtracker-production.up.railway.app/api/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

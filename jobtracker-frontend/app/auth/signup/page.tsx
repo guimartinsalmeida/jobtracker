@@ -26,7 +26,7 @@ export default function SignupPage() {
 
     setIsLoading(true);
     try {
-      const response = await axios.post('https://jobtracker-production.up.railway.app/api/auth/signup', { email, name, password });
+      const response = await axios.post('http://jobtracker-production.up.railway.app/api/auth/signup', { email, name, password });
       if (response.status === 201 || response.status === 200) {
         router.push('/auth/login');
       }
