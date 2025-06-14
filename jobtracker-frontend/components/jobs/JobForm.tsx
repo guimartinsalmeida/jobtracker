@@ -17,13 +17,18 @@ export interface JobFormData {
   notes: string;
 }
 
+interface FormErrors {
+  [key: string]: string;
+}
+
 interface JobFormProps {
   onSubmit: (data: JobFormData | FormData) => void;
   onCancel: () => void;
   initialData?: JobFormData;
+  isSubmitting?: boolean;
 }
 
-export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProps) {
+export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting = false }: JobFormProps) {
   const [form, setForm] = useState<JobFormData>({
     job_title: '',
     company_name: '',
@@ -40,6 +45,7 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
     notes: '',
   });
 
+  const [errors, setErrors] = useState<FormErrors>({});
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -49,8 +55,48 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
     }
   }, [initialData]);
 
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+    
+    if (!form.job_title.trim()) {
+      newErrors.job_title = 'Job title is required';
+    }
+    if (!form.company_name.trim()) {
+      newErrors.company_name = 'Company name is required';
+    }
+    if (!form.location.trim()) {
+      newErrors.location = 'Location is required';
+    }
+    if (!form.job_type) {
+      newErrors.job_type = 'Job type is required';
+    }
+    if (!form.application_date) {
+      newErrors.application_date = 'Application date is required';
+    }
+    if (!form.platform.trim()) {
+      newErrors.platform = 'Platform is required';
+    }
+    if (!form.phase) {
+      newErrors.phase = 'Current phase is required';
+    }
+    if (!form.job_description.trim()) {
+      newErrors.job_description = 'Job description is required';
+    }
+    if (!form.cv_file_url && !selectedFile) {
+      newErrors.cv_file_url = 'CV/Resume is required';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: '' }));
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -58,9 +104,10 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
       const file = e.target.files[0];
       if (file.type === 'application/pdf') {
         setSelectedFile(file);
-        setForm({ ...form, cv_file_url: file.name });
+        setForm(prev => ({ ...prev, cv_file_url: file.name }));
+        setErrors(prev => ({ ...prev, cv_file_url: '' }));
       } else {
-        alert('Please select a PDF file');
+        setErrors(prev => ({ ...prev, cv_file_url: 'Please select a PDF file' }));
       }
     }
   };
@@ -72,11 +119,14 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!validateForm()) {
+      return;
+    }
+    
     if (selectedFile) {
       const formData = new FormData();
       formData.append('cv_file', selectedFile);
       
-      // Append all other form fields
       Object.keys(form).forEach(key => {
         if (key !== 'cv_file_url') {
           formData.append(key, form[key as keyof typeof form]);
@@ -89,13 +139,34 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && e.ctrlKey) {
+      handleSubmit(e);
+    }
+  };
+
+  const renderError = (fieldName: string) => {
+    return errors[fieldName] ? (
+      <p className="text-red-400 text-sm mt-1">{errors[fieldName]}</p>
+    ) : null;
+  };
+
+  const renderCharCounter = (value: string, maxLength: number) => {
+    return (
+      <p className="text-gray-400 text-xs mt-1 text-right">
+        {value.length}/{maxLength} characters
+      </p>
+    );
+  };
+
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-8 w-full  text-white mx-auto"
+      onKeyDown={handleKeyDown}
+      className="space-y-8 w-full text-white mx-auto"
     >
       <div className="flex flex-col md:flex-row gap-1 w-full">
-      <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2">
           {/* Documents */}
           <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
             <div className="flex items-center gap-2 mb-4">
@@ -110,8 +181,9 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
                   value={form.cv_file_url} 
                   readOnly 
                   placeholder="Select a PDF file" 
-                  className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" 
+                  className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.cv_file_url ? 'border border-red-400' : ''}`}
                 />
+                {renderError('cv_file_url')}
               </div>
               <div>
                 <input
@@ -131,10 +203,18 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
               </div>
               <div>
                 <label className="block mb-1 text-sm font-medium">Cover Letter URL</label>
-                <input name="cover_letter_url" value={form.cover_letter_url} onChange={handleChange} placeholder="URL to your cover letter" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+                <input 
+                  name="cover_letter_url" 
+                  value={form.cover_letter_url} 
+                  onChange={handleChange} 
+                  placeholder="URL to your cover letter" 
+                  className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" 
+                />
               </div>
               <div>
-                <button type="button" className="w-full flex items-center justify-center gap-2 p-2 rounded bg-gray-700 hover:bg-gray-800 text-sm font-medium"><span>Upload</span></button>
+                <button type="button" className="w-full flex items-center justify-center gap-2 p-2 rounded bg-gray-700 hover:bg-gray-800 text-sm font-medium">
+                  <span>Upload</span>
+                </button>
               </div>
             </div>
           </div>
@@ -147,105 +227,202 @@ export default function JobForm({ onSubmit, onCancel, initialData }: JobFormProp
             <div className="space-y-4">
               <div>
                 <label className="block mb-1 text-sm font-medium">Job Description <span className="text-red-400">*</span></label>
-                <textarea name="job_description" value={form.job_description} onChange={handleChange} required placeholder="Copy and paste the job description here..." className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none min-h-[80px]" />
+                <textarea 
+                  name="job_description" 
+                  value={form.job_description} 
+                  onChange={handleChange} 
+                  required 
+                  placeholder="Copy and paste the job description here..." 
+                  className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none min-h-[80px] ${errors.job_description ? 'border border-red-400' : ''}`}
+                  maxLength={2000}
+                />
+                {renderError('job_description')}
+                {renderCharCounter(form.job_description, 2000)}
               </div>
               <div>
                 <label className="block mb-1 text-sm font-medium">Feedback Received</label>
-                <textarea name="feedback" value={form.feedback} onChange={handleChange} placeholder="Any feedback from interviews or application..." className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none min-h-[60px]" />
+                <textarea 
+                  name="feedback" 
+                  value={form.feedback} 
+                  onChange={handleChange} 
+                  placeholder="Any feedback from interviews or application..." 
+                  className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none min-h-[60px]"
+                  maxLength={500}
+                />
+                {renderCharCounter(form.feedback, 500)}
               </div>
               <div>
                 <label className="block mb-1 text-sm font-medium">Personal Notes</label>
-                <textarea name="notes" value={form.notes} onChange={handleChange} placeholder="Your own notes about this application..." className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none min-h-[60px]" />
+                <textarea 
+                  name="notes" 
+                  value={form.notes} 
+                  onChange={handleChange} 
+                  placeholder="Your own notes about this application..." 
+                  className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none min-h-[60px]"
+                  maxLength={500}
+                />
+                {renderCharCounter(form.notes, 500)}
               </div>
             </div>
           </div>
         </div>
         <div className='flex flex-col justify-between'>
-        <div className="flex-1 space-y-2">
-          {/* Basic Information */}
-          <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
-            <div className="flex items-center gap-2 mb-4">
-              <FaInfoCircle className="text-blue-400 text-xl" />
-              <h2 className="text-xl font-bold tracking-tight">Basic Information</h2>
+          <div className="flex-1 space-y-2">
+            {/* Basic Information */}
+            <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
+              <div className="flex items-center gap-2 mb-4">
+                <FaInfoCircle className="text-blue-400 text-xl" />
+                <h2 className="text-xl font-bold tracking-tight">Basic Information</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Job Title <span className="text-red-400">*</span></label>
+                  <input 
+                    name="job_title" 
+                    value={form.job_title} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="e.g. Frontend Developer" 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.job_title ? 'border border-red-400' : ''}`}
+                  />
+                  {renderError('job_title')}
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Company Name <span className="text-red-400">*</span></label>
+                  <input 
+                    name="company_name" 
+                    value={form.company_name} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="e.g. Acme Corp" 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.company_name ? 'border border-red-400' : ''}`}
+                  />
+                  {renderError('company_name')}
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Location <span className="text-red-400">*</span></label>
+                  <input 
+                    name="location" 
+                    value={form.location} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="e.g. Remote, São Paulo" 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.location ? 'border border-red-400' : ''}`}
+                  />
+                  {renderError('location')}
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Job Type <span className="text-red-400">*</span></label>
+                  <select 
+                    name="job_type" 
+                    value={form.job_type} 
+                    onChange={handleChange} 
+                    required 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.job_type ? 'border border-red-400' : ''}`}
+                  >
+                    <option value="">Select job type</option>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                    <option value="Internship">Internship</option>
+                    <option value="Contract">Contract</option>
+                  </select>
+                  {renderError('job_type')}
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-1 text-sm font-medium">Job Title <span className="text-red-400">*</span></label>
-                <input name="job_title" value={form.job_title} onChange={handleChange} required placeholder="e.g. Frontend Developer" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
+            {/* Application Details */}
+            <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
+              <div className="flex items-center gap-2 mb-4">
+                <FaClipboardList className="text-blue-400 text-xl" />
+                <h2 className="text-xl font-bold tracking-tight">Application Details</h2>
               </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Company Name <span className="text-red-400">*</span></label>
-                <input name="company_name" value={form.company_name} onChange={handleChange} required placeholder="e.g. Acme Corp" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Location <span className="text-red-400">*</span></label>
-                <input name="location" value={form.location} onChange={handleChange} required placeholder="e.g. Remote, São Paulo" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Job Type <span className="text-red-400">*</span></label>
-                <select name="job_type" value={form.job_type} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="">Select job type</option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Part-time">Part-time</option>
-                  <option value="Internship">Internship</option>
-                  <option value="Contract">Contract</option>
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Application Date <span className="text-red-400">*</span></label>
+                  <input 
+                    type="date" 
+                    name="application_date" 
+                    value={form.application_date} 
+                    onChange={handleChange} 
+                    required 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.application_date ? 'border border-red-400' : ''}`}
+                  />
+                  {renderError('application_date')}
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Application Platform <span className="text-red-400">*</span></label>
+                  <input 
+                    name="platform" 
+                    value={form.platform} 
+                    onChange={handleChange} 
+                    required 
+                    placeholder="e.g. LinkedIn, Gupy" 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.platform ? 'border border-red-400' : ''}`}
+                  />
+                  {renderError('platform')}
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Current Phase <span className="text-red-400">*</span></label>
+                  <select 
+                    name="phase" 
+                    value={form.phase} 
+                    onChange={handleChange} 
+                    required 
+                    className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.phase ? 'border border-red-400' : ''}`}
+                  >
+                    <option value="">Select current phase</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                  </select>
+                  {renderError('phase')}
+                </div>
+                <div>
+                  <label className="block mb-1 text-sm font-medium">Days to First Response</label>
+                  <input 
+                    type="number" 
+                    name="first_response_days" 
+                    value={form.first_response_days} 
+                    onChange={handleChange} 
+                    placeholder="e.g. 5" 
+                    className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none"
+                    min="0"
+                  />
+                </div>
               </div>
             </div>
           </div>
-          {/* Application Details */}
-          <div className="bg-[#181C23] bg-opacity-90 rounded-2xl p-6 shadow-xl border border-[#23283A] hover:border-blue-500 transition">
-            <div className="flex items-center gap-2 mb-4">
-              <FaClipboardList className="text-blue-400 text-xl" />
-              <h2 className="text-xl font-bold tracking-tight">Application Details</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-1 text-sm font-medium">Application Date <span className="text-red-400">*</span></label>
-                <input type="date" name="application_date" value={form.application_date} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Application Platform <span className="text-red-400">*</span></label>
-                <input name="platform" value={form.platform} onChange={handleChange} required placeholder="e.g. LinkedIn, Gupy" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Current Phase <span className="text-red-400">*</span></label>
-                <select name="phase" value={form.phase} onChange={handleChange} required className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none">
-                  <option value="">Select current phase</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Interview">Interview</option>
-                  <option value="Offer">Offer</option>
-                  <option value="Rejected">Rejected</option>
-                </select>
-              </div>
-              <div>
-                <label className="block mb-1 text-sm font-medium">Days to First Response</label>
-                <input type="number" name="first_response_days" value={form.first_response_days} onChange={handleChange} placeholder="e.g. 5" className="w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none" />
-              </div>
-            </div>
-          </div>
-        </div>
       
           <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          className="px-4 py-2 rounded bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 font-semibold transition"
-        >
-          Save
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={onCancel}
+              className="px-4 py-2 rounded bg-gray-600 hover:bg-gray-700 transition"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 rounded bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <span className="flex items-center gap-2">
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </span>
+              ) : (
+                'Save'
+              )}
+            </button>
+          </div>
         </div>
-
-        
       </div>
-     
     </form>
   );
 } 
