@@ -20,8 +20,12 @@ export default function LoginPage() {
       const decodedToken = jwtDecode(res.data.token) as { userId: string };
       await fetchUserData(decodedToken.userId);
       router.push('/home');
-    } catch (error) {
-      setError('Invalid credentials');
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Invalid credentials');
+      } else {
+        setError('An unexpected error occurred');
+      }
     }
   };
 
@@ -49,7 +53,7 @@ export default function LoginPage() {
         </button>
 
         <div className='flex justify-center mt-4'>
-          <p className="text-white text-sm mb-4">Don't have an account? <Link href="/auth/signup">Sign up</Link></p>
+          <p className="text-white text-sm mb-4">Don&apos;t have an account? <Link href="/auth/signup">Sign up</Link></p>
         </div>
       </div>
     </div>
