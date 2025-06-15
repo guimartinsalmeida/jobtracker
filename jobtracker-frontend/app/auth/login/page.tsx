@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{ email?: string; password?: string }>({});
   const router = useRouter();
   const { fetchUserData } = useUser();
@@ -46,6 +47,11 @@ export default function LoginPage() {
     try {
       const res = await axios.post('http://localhost:3001/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
+      if (rememberMe) {
+        localStorage.setItem('rememberedEmail', email);
+      } else {
+        localStorage.removeItem('rememberedEmail');
+      }
       const decodedToken = jwtDecode(res.data.token) as { userId: string };
       await fetchUserData(decodedToken.userId);
       router.push('/home');
@@ -59,6 +65,14 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem('rememberedEmail');
+    if (rememberedEmail) {
+      setEmail(rememberedEmail);
+      setRememberMe(true);
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900">
@@ -114,6 +128,19 @@ export default function LoginPage() {
               <p className="text-red-500 text-sm">{error}</p>
             </div>
           )}
+
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-gray-700"
+            />
+            <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-300">
+              Remember me
+            </label>
+          </div>
 
           <button
             type="submit"
