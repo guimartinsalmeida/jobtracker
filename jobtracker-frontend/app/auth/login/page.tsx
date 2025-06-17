@@ -164,11 +164,16 @@ export default function LoginPage() {
             )}
           </button>
 
-          <div className="text-center">
+          <div className="text-center space-y-2">
             <p className="text-gray-400 text-sm">
               Don&apos;t have an account?{' '}
               <Link href="/auth/signup" className="text-blue-500 hover:text-blue-400 transition-colors">
                 Sign up
+              </Link>
+            </p>
+            <p className="text-gray-400 text-sm">
+              <Link href="/auth/forgot-password" className="text-blue-500 hover:text-blue-400 transition-colors">
+                Forgot your password?
               </Link>
             </p>
           </div>
