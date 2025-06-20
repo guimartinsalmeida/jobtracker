@@ -7,6 +7,23 @@
 
 A modern full-stack application designed to streamline and organize your job application process. Keep track of all your job applications in one secure, centralized platform.
 
+## ⚡ Quick Start
+
+```bash
+# Clone and setup backend
+git clone https://github.com/guimartinsalmeida/jobtracker.git
+cd jobtracker/backend
+npm install
+cp .env.example .env
+# Configure your .env file
+npm run dev
+
+# In another terminal, setup frontend
+cd ../jobtracker-frontend
+npm install
+npm run dev
+```
+
 ## ✨ Features
 
 - 🔐 **Secure Authentication**
@@ -105,14 +122,12 @@ You can test the API using Postman or Insomnia:
 
 ## 🎯 Roadmap
 
+- [x] React frontend implementation
 - [ ] File upload functionality for CV and cover letters
-- [ ] React frontend implementation
 - [ ] Advanced job filtering and search
 - [ ] Analytics dashboard for application insights
 - [ ] Email notifications for status updates
 - [ ] Export functionality for job applications
-
-
 
 ## 📝 License
 
