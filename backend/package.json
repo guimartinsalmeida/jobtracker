@@ -1,17 +1,26 @@
 {
-  "name": "jobtracker",
+  "name": "jobtracker-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Backend API for Job Tracker - A modern full-stack application for managing job applications",
+  "main": "src/index.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "echo \"Linting not configured yet\"",
+    "format": "echo \"Formatting not configured yet\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["job-tracker", "api", "express", "postgresql", "jwt", "authentication"],
+  "author": "Guilherme Martins Almeida",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/guimartinsalmeida/jobtracker.git"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
   "dependencies": {
     "axios": "^1.9.0",
     "bcrypt": "^6.0.0",
