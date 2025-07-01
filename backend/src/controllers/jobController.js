@@ -20,16 +20,9 @@ export const createJob = async (req, res) => {
       const {
         job_title,
         company_name,
-        cover_letter_url,
-        job_description,
-        phase,
-        application_date,
         platform,
-        first_response_days,
-        feedback,
-        location,
         job_type,
-        notes,
+        status,
       } = req.body
 
       const user_id = req.userId
@@ -43,16 +36,9 @@ export const createJob = async (req, res) => {
           job_title,
           company_name,
           cv_file_url,
-          cover_letter_url,
-          job_description,
-          phase,
-          application_date,
-          platform,
-          first_response_days,
-          feedback,
-          location,
+          platform: platform || 'Manual', // Default value if not provided
           job_type,
-          notes,
+          status: status || 'applied', // Default value if not provided
         })
 
         res.status(201).json({ message: 'Job created', job })
@@ -160,3 +146,5 @@ export const deleteJob = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' })
   }
 }
+
+

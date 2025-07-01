@@ -1,13 +1,13 @@
 'use client';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { FiPlus } from 'react-icons/fi';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler } from 'chart.js';
-import { Doughnut, Line } from 'react-chartjs-2';
+import { FiPlus, FiTrendingUp, FiDollarSign, FiBriefcase, FiUsers } from 'react-icons/fi';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler, BarElement } from 'chart.js';
+import { Doughnut, Line, Bar } from 'react-chartjs-2';
 import { useEffect, useState } from 'react';
 import { useUser } from '@/contexts/UserContext';
 import axios from 'axios';
 
-ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, PointElement, LineElement, Filler, BarElement);
 
 interface AnalyticsData {
   summary: {
@@ -17,7 +17,7 @@ interface AnalyticsData {
     rejections: number;
   };
   byStage: Array<{
-    phase: string;
+    status: string;
     count: string;
   }>;
   overTime: Array<{
@@ -27,31 +27,50 @@ interface AnalyticsData {
   recentApplications: Array<{
     title: string;
     company: string;
-    stage: string;
-    application_date: string;
+    status: string;
     created_at: string;
   }>;
+  insights: {
+    conversionByPlatform: Array<{
+      platform: string;
+      conversion_rate: string;
+    }>;
+    successByJobType: Array<{
+      job_type: string;
+      success_rate: string;
+    }>;
+    bestPerformingCVs: Array<{
+      cv_file_url: string;
+      successful_apps: string;
+      total_apps: string;
+    }>;
+  };
 }
 
 export default function AnalyticsPage() {
   const { user } = useUser();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<'weekly' | 'monthly'>('monthly');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       if (!user?.id) return;
       
       try {
+        setError(null);
         const token = localStorage.getItem('token');
-        const response = await axios.get(`http://jobtracker-production.up.railway.app/api/analytics/user/${user.id}`, {
+        const response = await axios.get(`http://localhost:3001/api/analytics/user/${user.id}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
         });
         setAnalytics(response.data);
+        console.log(response.data);
       } catch (error) {
         console.error('Error fetching analytics:', error);
+        setError('Failed to load analytics data. Please try again.');
       } finally {
         setLoading(false);
       }
@@ -60,7 +79,7 @@ export default function AnalyticsPage() {
     fetchAnalytics();
   }, [user?.id]);
 
-  if (loading || !analytics) {
+  if (loading) {
     return (
       <div className="flex min-h-screen bg-[#151A23]">
         <Sidebar />
@@ -115,16 +134,51 @@ export default function AnalyticsPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="flex min-h-screen bg-[#151A23]">
+        <Sidebar />
+        <main className="flex-1 p-10">
+          <div className="text-center">
+            <div className="text-red-400 text-lg mb-4">{error}</div>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Try Again
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <div className="flex min-h-screen bg-[#151A23]">
+        <Sidebar />
+        <main className="flex-1 p-10">
+          <div className="text-center text-gray-400">
+            <h2 className="text-xl mb-4">No Analytics Data Available</h2>
+            <p>Start adding job applications to see your analytics.</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   const getStageColor = (stage: string) => {
-    switch (stage) {
-      case 'Interview':
+    switch (stage.toLowerCase()) {
+      case 'interviewed':
         return 'bg-purple-600';
-      case 'Offer':
+      case 'offered':
         return 'bg-green-600';
-      case 'Rejected':
+      case 'rejected':
         return 'bg-red-600';
-      default:
+      case 'applied':
         return 'bg-blue-600';
+      default:
+        return 'bg-gray-600';
     }
   };
 
@@ -136,59 +190,68 @@ export default function AnalyticsPage() {
     
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Yesterday';
-    return `${diffDays} days ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
+
+
+
+  // Calculate conversion rate
+  const totalSuccessful = analytics.summary.interviewsScheduled + analytics.summary.offersReceived;
+  const conversionRate = analytics.summary.totalApplications > 0 
+    ? Math.round((totalSuccessful / analytics.summary.totalApplications) * 100) 
+    : 0;
 
   const summaryCards = [
     {
       label: 'Total Applications',
       value: analytics.summary.totalApplications,
-      icon: <FiPlus className="text-blue-400" />,
+      icon: <FiBriefcase className="text-blue-400" />,
       change: '+12%',
       changeColor: 'text-green-400',
       sub: 'vs last month',
-      bg: 'bg-[#181F2A]'
+      bg: 'bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-500/30'
     },
     {
       label: 'Interviews Scheduled',
       value: analytics.summary.interviewsScheduled,
-      icon: <FiPlus className="text-purple-400" />,
+      icon: <FiUsers className="text-purple-400" />,
       change: '+33%',
       changeColor: 'text-green-400',
       sub: 'vs last month',
-      bg: 'bg-[#181F2A]'
+      bg: 'bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-500/30'
     },
     {
       label: 'Offers Received',
       value: analytics.summary.offersReceived,
-      icon: <FiPlus className="text-green-400" />,
+      icon: <FiDollarSign className="text-green-400" />,
       change: '+100%',
       changeColor: 'text-green-400',
       sub: 'vs last month',
-      bg: 'bg-[#181F2A]'
+      bg: 'bg-gradient-to-br from-green-600/20 to-green-800/20 border border-green-500/30'
     },
     {
-      label: 'Rejections',
-      value: analytics.summary.rejections,
-      icon: <FiPlus className="text-red-400" />,
-      change: '-16%',
-      changeColor: 'text-red-400',
-      sub: 'vs last month',
-      bg: 'bg-[#181F2A]'
+      label: 'Conversion Rate',
+      value: `${conversionRate}%`,
+      icon: <FiTrendingUp className="text-cyan-400" />,
+      change: '+5%',
+      changeColor: 'text-green-400',
+      sub: 'success rate',
+      bg: 'bg-gradient-to-br from-cyan-600/20 to-cyan-800/20 border border-cyan-500/30'
     },
   ];
 
   const doughnutData = {
-    labels: analytics.byStage.map(stage => stage.phase),
+    labels: analytics.byStage.map(stage => stage.status),
     datasets: [
       {
         data: analytics.byStage.map(stage => parseInt(stage.count)),
         backgroundColor: [
-          '#3B82F6', // blue
-          '#8B5CF6', // purple
-          '#F59E42', // orange
-          '#22D3EE', // cyan
-          '#EF4444', // red
+          '#3B82F6', // blue - applied
+          '#8B5CF6', // purple - interviewed
+          '#10B981', // green - offered
+          '#EF4444', // red - rejected
+          '#6B7280', // gray - other
         ],
         borderWidth: 0,
       },
@@ -201,6 +264,22 @@ export default function AnalyticsPage() {
       legend: {
         display: false,
       },
+      tooltip: {
+        backgroundColor: '#181F2A',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#232B3B',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context: { parsed: number; label: string; dataset: { data: number[] } }) {
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = Math.round((context.parsed / total) * 100);
+            return `${context.label}: ${context.parsed} (${percentage}%)`;
+          }
+        }
+      }
     },
     maintainAspectRatio: false,
   };
@@ -262,7 +341,68 @@ export default function AnalyticsPage() {
         },
         ticks: {
           color: '#9CA3AF',
-          stepSize: 2,
+          stepSize: 1,
+        },
+      },
+    },
+  };
+
+  // Platform conversion data
+  const platformData = {
+    labels: analytics.insights.conversionByPlatform.map(item => item.platform || 'Unknown'),
+    datasets: [
+      {
+        label: 'Conversion Rate (%)',
+        data: analytics.insights.conversionByPlatform.map(item => parseFloat(item.conversion_rate) || 0),
+        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+        borderColor: '#8B5CF6',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const platformOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: '#181F2A',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#232B3B',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context: { parsed: { y: number } }) {
+            return `Conversion Rate: ${context.parsed.y.toFixed(1)}%`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#9CA3AF',
+        },
+      },
+      y: {
+        beginAtZero: true,
+        max: 100,
+        grid: {
+          color: '#232B3B',
+        },
+        ticks: {
+          color: '#9CA3AF',
+          callback: function(this: unknown, tickValue: string | number) {
+            return tickValue + '%';
+          }
         },
       },
     },
@@ -271,13 +411,15 @@ export default function AnalyticsPage() {
   return (
     <div className="flex min-h-screen bg-[#151A23]">
       <Sidebar />
-      <main className="flex-1 p-10">
+      <main className="flex-1 p-10 overflow-y-auto">
         <h1 className="text-2xl font-bold text-white mb-2">Welcome back, {user?.name}! <span className="inline-block">👋</span></h1>
         <p className="text-gray-400 mb-8">Here is an overview of your job search progress</p>
+        
+        {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {summaryCards.map((card, idx) => (
-            <div key={idx} className={`rounded-xl p-6 ${card.bg} flex flex-col gap-2 shadow-md`}>
-              <div className="flex items-center gap-2 text-gray-400 text-sm font-medium">
+            <div key={idx} className={`rounded-xl p-6 ${card.bg} flex flex-col gap-2 shadow-lg backdrop-blur-sm`}>
+              <div className="flex items-center gap-2 text-gray-300 text-sm font-medium">
                 {card.icon}
                 {card.label}
               </div>
@@ -289,8 +431,11 @@ export default function AnalyticsPage() {
             </div>
           ))}
         </div>
+
+        {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+          {/* Applications by Stage */}
+          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B]">
             <h2 className="text-white font-semibold mb-4">Applications by Stage</h2>
             <div className="flex flex-col items-center">
               <div className="w-48 h-48 mb-4">
@@ -300,18 +445,38 @@ export default function AnalyticsPage() {
                 {doughnutData.labels.map((label, idx) => (
                   <div key={label} className="flex items-center gap-2 text-sm">
                     <span className="inline-block w-3 h-3 rounded-full" style={{ backgroundColor: doughnutData.datasets[0].backgroundColor[idx] }}></span>
-                    <span className="text-gray-300">{label}</span>
+                    <span className="text-gray-300 capitalize">{label}</span>
                   </div>
                 ))}
               </div>
             </div>
           </div>
-          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+
+          {/* Applications Over Time */}
+          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B]">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-white font-semibold">Applications Over Time</h2>
               <div className="flex gap-2">
-                <button className="px-3 py-1 rounded-lg text-xs font-semibold bg-[#232B3B] text-gray-400">Weekly</button>
-                <button className="px-3 py-1 rounded-lg text-xs font-semibold bg-blue-700 text-white">Monthly</button>
+                <button 
+                  onClick={() => setTimeRange('weekly')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    timeRange === 'weekly' 
+                      ? 'bg-blue-700 text-white' 
+                      : 'bg-[#232B3B] text-gray-400 hover:bg-[#2A3441]'
+                  }`}
+                >
+                  Weekly
+                </button>
+                <button 
+                  onClick={() => setTimeRange('monthly')}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
+                    timeRange === 'monthly' 
+                      ? 'bg-blue-700 text-white' 
+                      : 'bg-[#232B3B] text-gray-400 hover:bg-[#2A3441]'
+                  }`}
+                >
+                  Monthly
+                </button>
               </div>
             </div>
             <div className="h-56">
@@ -319,32 +484,57 @@ export default function AnalyticsPage() {
             </div>
           </div>
         </div>
-        <div className="rounded-xl bg-[#181F2A] p-6 shadow-md">
+
+        {/* Insights Section */}
+        {analytics.insights.conversionByPlatform.length > 0 && (
+          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B] mb-8">
+            <h2 className="text-white font-semibold mb-4">Platform Performance</h2>
+            <div className="h-64">
+              <Bar data={platformData} options={platformOptions} />
+            </div>
+          </div>
+        )}
+
+        {/* Recent Applications */}
+        <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B] mb-8">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-white font-semibold">Recent Applications</h2>
-            <a href="/home" className="text-blue-400 text-sm font-semibold hover:underline">View all</a>
+            <a href="/home" className="text-blue-400 text-sm font-semibold hover:underline transition-colors">View all</a>
           </div>
           <div className="flex flex-col gap-4">
-            {analytics.recentApplications.map((app, idx) => (
-              <div key={idx} className="flex items-center justify-between bg-[#232B3B] rounded-lg px-4 py-3">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-lg">
-                    {app.title[0]}
+            {analytics.recentApplications.length > 0 ? (
+              analytics.recentApplications.map((app, idx) => (
+                <div key={idx} className="flex items-center justify-between bg-[#232B3B] rounded-lg px-4 py-3 hover:bg-[#2A3441] transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-lg">
+                      {app.title[0]?.toUpperCase() || '?'}
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold">{app.title}</div>
+                      <div className="text-gray-400 text-sm">{app.company}</div>
+                    </div>
+                    <span className={`ml-4 px-2 py-1 rounded text-xs font-semibold ${getStageColor(app.status)} text-white capitalize`}>
+                      {app.status}
+                    </span>
                   </div>
-                  <div>
-                    <div className="text-white font-semibold">{app.title}</div>
-                    <div className="text-gray-400 text-sm">{app.company}</div>
-                  </div>
-                  <span className={`ml-4 px-2 py-1 rounded text-xs font-semibold ${getStageColor(app.stage)} text-white`}>{app.stage}</span>
+                  <div className="text-gray-400 text-xs">{formatDate(app.created_at)}</div>
                 </div>
-                <div className="text-gray-400 text-xs">{formatDate(app.created_at)}</div>
+              ))
+            ) : (
+              <div className="text-center text-gray-400 py-8">
+                <p>No applications yet. Start tracking your job applications!</p>
               </div>
-            ))}
+            )}
           </div>
-          <button className="fixed bottom-10 right-10 bg-blue-700 hover:bg-blue-800 text-white p-4 rounded-full shadow-lg transition flex items-center justify-center">
-            <FiPlus size={24} />
-          </button>
         </div>
+
+        {/* Add Job Button */}
+        <button 
+          onClick={() => window.location.href = '/home'}
+          className="fixed bottom-10 right-10 bg-blue-700 hover:bg-blue-800 text-white p-4 rounded-full shadow-lg transition-all duration-200 flex items-center justify-center hover:scale-110"
+        >
+          <FiPlus size={24} />
+        </button>
       </main>
     </div>
   );

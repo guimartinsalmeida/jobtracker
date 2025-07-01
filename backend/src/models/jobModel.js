@@ -5,40 +5,25 @@ export const createJobInDB = async ({
   job_title,
   company_name,
   cv_file_url,
-  cover_letter_url,
-  job_description,
-  phase,
-  application_date,
   platform,
-  first_response_days,
-  feedback,
-  location,
   job_type,
-  notes,
+  status
 }) => {
   const result = await pool.query(
     `INSERT INTO jobs (
-      user_id, job_title, company_name, cv_file_url, cover_letter_url,
-      job_description, phase, application_date, platform,
-      first_response_days, feedback, location, job_type, notes
+      user_id, job_title, company_name, cv_file_url,
+      platform, job_type, status
     )
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+    VALUES ($1,$2,$3,$4,$5,$6,$7)
     RETURNING *`,
     [
       user_id,
       job_title,
       company_name,
       cv_file_url,
-      cover_letter_url,
-      job_description,
-      phase,
-      application_date,
       platform,
-      first_response_days,
-      feedback,
-      location,
       job_type,
-      notes,
+      status
     ]
   )
 
@@ -80,4 +65,6 @@ export const deleteJobService = async (id) => {
   const result = await pool.query('DELETE FROM jobs WHERE id = $1 RETURNING *', [id])
   return result.rows[0]
 }
+
+
   

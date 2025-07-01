@@ -2,10 +2,11 @@ import React from 'react';
 
 const statusOptions = [
   { label: 'All', value: 'All' },
-  { label: 'Pending', value: 'Pending' },
-  { label: 'Interview', value: 'Interview' },
-  { label: 'Offer', value: 'Offer' },
-  { label: 'Rejected', value: 'Rejected' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Interviewed', value: 'interviewed' },
+  { label: 'Offer', value: 'offer' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'Waiting Response', value: 'waiting_response' },
 ];
 
 interface JobFiltersProps {

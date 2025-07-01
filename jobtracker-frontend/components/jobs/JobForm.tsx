@@ -3,7 +3,10 @@ import { FaFileAlt } from 'react-icons/fa';
 
 export interface JobFormData {
   job_title: string;
+  company_name: string;
   job_type: string;
+  platform: string;
+  status: string;
   cv_file_url: string;
 }
 
@@ -21,7 +24,10 @@ interface JobFormProps {
 export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting = false }: JobFormProps) {
   const [form, setForm] = useState<JobFormData>({
     job_title: '',
+    company_name: '',
     job_type: '',
+    platform: '',
+    status: 'applied',
     cv_file_url: '',
   });
 
@@ -41,9 +47,16 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
     if (!form.job_title.trim()) {
       newErrors.job_title = 'Job title is required';
     }
+    if (!form.company_name.trim()) {
+      newErrors.company_name = 'Company name is required';
+    }
     if (!form.job_type) {
       newErrors.job_type = 'Job type is required';
     }
+    if (!form.platform.trim()) {
+      newErrors.platform = 'Platform is required';
+    }
+   
     if (!form.cv_file_url && !selectedFile) {
       newErrors.cv_file_url = 'CV/Resume is required';
     }
@@ -137,6 +150,18 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
             />
             {renderError('job_title')}
           </div>
+          <div>
+            <label className="block mb-1 text-sm font-medium">Company Name <span className="text-red-400">*</span></label>
+            <input 
+              name="company_name" 
+              value={form.company_name} 
+              onChange={handleChange} 
+              required 
+              placeholder="e.g. Google" 
+              className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.company_name ? 'border border-red-400' : ''}`}
+            />
+            {renderError('company_name')}
+          </div>
 
           <div>
             <label className="block mb-1 text-sm font-medium">Job Type <span className="text-red-400">*</span></label>
@@ -155,6 +180,21 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
             </select>
             {renderError('job_type')}
           </div>
+
+          <div>
+            <label className="block mb-1 text-sm font-medium">Platform <span className="text-red-400">*</span></label>
+            <input 
+              name="platform" 
+              value={form.platform} 
+              onChange={handleChange} 
+              required 
+              placeholder="e.g. LinkedIn" 
+              className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.platform ? 'border border-red-400' : ''}`}
+            />
+            {renderError('platform')}
+          </div>
+
+         
 
           <div>
             <label className="block mb-1 text-sm font-medium">Resume/CV <span className="text-red-400">*</span></label>

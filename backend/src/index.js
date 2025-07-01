@@ -11,6 +11,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import analyticsRoutes from './routes/analyticsRoutes.js'
 import axios from 'axios'
+import { removeExtraFields } from './data/removeExtraFields.js'
+import { addStatusColumn } from './data/addStatusColumn.js'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -46,8 +48,12 @@ app.get('/', async(req, res) =>{
 })
 
 //server running
-app.listen(port, () =>{
-   console.log(`Server is running on http://localhost:${port}`) 
+app.listen(port, async () =>{
+   console.log(`Server is running on http://localhost:${port}`)
+   // Remove extra fields that were added without permission
+   await removeExtraFields()
+   // Add status column to jobs table
+   await addStatusColumn()
 })
 
 axios.defaults.withCredentials = true;

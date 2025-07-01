@@ -18,8 +18,9 @@ type Job = {
   company: string;
   location: string;
   type: string;
+  platform: string;
   appliedDate: string;
-  status: 'Pending' | 'Interview' | 'Offer' | 'Rejected';
+  status: string;
   response: string;
 };
 
@@ -29,8 +30,9 @@ type ApiJob = {
   company_name: string;
   location: string;
   job_type: string;
+  platform: string;
   application_date: string;
-  phase: 'Pending' | 'Interview' | 'Offer' | 'Rejected';
+  status: string;
   first_response_days: number | null;
 };
 
@@ -63,7 +65,7 @@ export default function HomePage() {
           }
         }
 
-        const response = await axios.get(`http://jobtracker-production.up.railway.app/api/jobs/user/${user?.id}`, {
+        const response = await axios.get(`http://localhost:3001/api/jobs/user/${user?.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -80,8 +82,9 @@ export default function HomePage() {
           company: job.company_name,
           location: job.location,
           type: job.job_type,
+          platform: job.platform,
           appliedDate: new Date(job.application_date).toLocaleDateString(),
-          status: job.phase,
+          status: job.status,
           response: job.first_response_days ? `First response: ${job.first_response_days} days` : 'No response yet',
         }));
         
@@ -114,7 +117,7 @@ export default function HomePage() {
   const handleJobFormSubmit = async (data: JobFormData | FormData) => {
     try {
       const token = localStorage.getItem('token');
-      await axios.post('http://jobtracker-production.up.railway.app/api/jobs', data, {
+      await axios.post('http://localhost:3001/api/jobs', data, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -125,6 +128,14 @@ export default function HomePage() {
     } catch {
       alert('Erro ao criar job. Tente novamente.');
     }
+  };
+
+  const handleStatusUpdate = (jobId: number, newStatus: string) => {
+    setJobs(prevJobs => 
+      prevJobs.map(job => 
+        job.id === jobId ? { ...job, status: newStatus } : job
+      )
+    );
   };
 
   if (isLoading) {
@@ -188,7 +199,7 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredJobs.map((job) => (
-              <JobCard key={job.id} job={job} />
+              <JobCard key={job.id} job={job} onStatusUpdate={handleStatusUpdate} />
             ))}
           </div>
         )}

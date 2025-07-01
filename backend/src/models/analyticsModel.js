@@ -1,83 +1,108 @@
-import pool from '../config/db.js'
+import pool from '../config/db.js';
 
 export const getAnalyticsByUserIdService = async (userId) => {
-  // Get total applications
+  // Total applications
   const totalAppsResult = await pool.query(
     'SELECT COUNT(*) FROM jobs WHERE user_id = $1',
     [userId]
-  )
-  const totalApplications = parseInt(totalAppsResult.rows[0].count)
+  );
+  const totalApplications = parseInt(totalAppsResult.rows[0].count);
 
-  // Get interviews scheduled (phase = 'Interview')
-  const interviewsResult = await pool.query(
-    'SELECT COUNT(*) FROM jobs WHERE user_id = $1 AND phase = $2',
-    [userId, 'Interview']
-  )
-  const interviewsScheduled = parseInt(interviewsResult.rows[0].count)
+  // Status counts
+  const statuses = ['interviewed', 'offer', 'rejected'];
+  const statusCounts = {};
+  for (const status of statuses) {
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM jobs WHERE user_id = $1 AND status = $2',
+      [userId, status]
+    );
+    statusCounts[status.toLowerCase()] = parseInt(result.rows[0].count);
+  }
 
-  // Get offers received (phase = 'Offer')
-  const offersResult = await pool.query(
-    'SELECT COUNT(*) FROM jobs WHERE user_id = $1 AND phase = $2',
-    [userId, 'Offer']
-  )
-  const offersReceived = parseInt(offersResult.rows[0].count)
-
-  // Get rejections (phase = 'Rejected')
-  const rejectionsResult = await pool.query(
-    'SELECT COUNT(*) FROM jobs WHERE user_id = $1 AND phase = $2',
-    [userId, 'Rejected']
-  )
-  const rejections = parseInt(rejectionsResult.rows[0].count)
-
-  // Get applications by stage
-  const stagesResult = await pool.query(
-    `SELECT phase, COUNT(*) as count 
+  // Applications by status
+  const statusDistResult = await pool.query(
+    `SELECT status, COUNT(*) as count 
      FROM jobs 
      WHERE user_id = $1 
-     GROUP BY phase`,
+     GROUP BY status`,
     [userId]
-  )
+  );
 
-  // Get applications over time (last 6 months)
-  const sixMonthsAgo = new Date()
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-  
+  // Applications over last 6 months
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
   const timeSeriesResult = await pool.query(
     `SELECT 
-      DATE_TRUNC('month', application_date) as month,
+      DATE_TRUNC('month', created_at) as month,
       COUNT(*) as count
      FROM jobs 
      WHERE user_id = $1 
-     AND application_date >= $2
-     GROUP BY DATE_TRUNC('month', application_date)
+     AND created_at >= $2
+     GROUP BY DATE_TRUNC('month', created_at)
      ORDER BY month ASC`,
     [userId, sixMonthsAgo]
-  )
+  );
 
-  // Get recent applications (last 5)
+  // Recent applications
   const recentApplicationsResult = await pool.query(
     `SELECT 
       job_title as title,
       company_name as company,
-      phase as stage,
-      application_date,
+      status,
       created_at
      FROM jobs 
      WHERE user_id = $1 
      ORDER BY created_at DESC 
      LIMIT 5`,
     [userId]
-  )
+  );
+
+  // Conversion rate by platform
+  const conversionByPlatformResult = await pool.query(
+    `SELECT platform, 
+            COUNT(*) FILTER (WHERE status IN ('interviewed', 'offer'))::float / NULLIF(COUNT(*), 0) * 100 as conversion_rate
+     FROM jobs
+     WHERE user_id = $1
+     GROUP BY platform`,
+    [userId]
+  );
+
+  // Success rate by job type
+  const successByJobTypeResult = await pool.query(
+    `SELECT job_type, 
+            COUNT(*) FILTER (WHERE status = 'offer')::float / NULLIF(COUNT(*), 0) * 100 as success_rate
+     FROM jobs
+     WHERE user_id = $1
+     GROUP BY job_type`,
+    [userId]
+  );
+
+  // Best performing CV
+  const cvPerformanceResult = await pool.query(
+    `SELECT cv_file_url, 
+            COUNT(*) FILTER (WHERE status IN ('Interviewed', 'offer')) as successful_apps,
+            COUNT(*) as total_apps
+     FROM jobs
+     WHERE user_id = $1
+     GROUP BY cv_file_url`,
+    [userId]
+  );
 
   return {
     summary: {
       totalApplications,
-      interviewsScheduled,
-      offersReceived,
-      rejections
+      interviewsScheduled: statusCounts.interviewed,
+      offersReceived: statusCounts.offer,
+      rejections: statusCounts.rejected
     },
-    byStage: stagesResult.rows,
+    byStage: statusDistResult.rows,
     overTime: timeSeriesResult.rows,
-    recentApplications: recentApplicationsResult.rows
-  }
-} 
+    recentApplications: recentApplicationsResult.rows,
+    insights: {
+      conversionByPlatform: conversionByPlatformResult.rows,
+      successByJobType: successByJobTypeResult.rows,
+      bestPerformingCVs: cvPerformanceResult.rows
+    }
+  };
+};
