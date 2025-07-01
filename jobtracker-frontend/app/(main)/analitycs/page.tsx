@@ -38,6 +38,12 @@ interface AnalyticsData {
     successByJobType: Array<{
       job_type: string;
       success_rate: string;
+      total_applications: string;
+    }>;
+    successByJobTitle: Array<{
+      job_title: string;
+      success_rate: string;
+      total_applications: string;
     }>;
     bestPerformingCVs: Array<{
       cv_file_url: string;
@@ -408,6 +414,142 @@ export default function AnalyticsPage() {
     },
   };
 
+  // Job Type Success Rate data
+  const jobTypeData = {
+    labels: analytics.insights.successByJobType.map(item => item.job_type || 'Unknown'),
+    datasets: [
+      {
+        label: 'Success Rate (%)',
+        data: analytics.insights.successByJobType.map(item => parseFloat(item.success_rate) || 0),
+        backgroundColor: 'rgba(16, 185, 129, 0.8)',
+        borderColor: '#10B981',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const jobTypeOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: '#181F2A',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#232B3B',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context: { parsed: { x: number }; dataIndex: number }) {
+            const jobType = jobTypeData.labels[context.dataIndex];
+            const totalApps = analytics.insights.successByJobType[context.dataIndex]?.total_applications || 0;
+            return [
+              `Job Type: ${jobType}`,
+              `Success Rate: ${context.parsed.x.toFixed(1)}%`,
+              `Total Applications: ${totalApps}`
+            ];
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        max: 100,
+        grid: {
+          color: '#232B3B',
+        },
+        ticks: {
+          color: '#9CA3AF',
+          callback: function(this: unknown, tickValue: string | number) {
+            return tickValue + '%';
+          }
+        },
+      },
+      y: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#9CA3AF',
+        },
+      },
+    },
+  };
+
+  // Job Title Success Rate data
+  const jobTitleData = {
+    labels: analytics.insights.successByJobTitle.map(item => item.job_title || 'Unknown'),
+    datasets: [
+      {
+        label: 'Success Rate (%)',
+        data: analytics.insights.successByJobTitle.map(item => parseFloat(item.success_rate) || 0),
+        backgroundColor: 'rgba(59, 130, 246, 0.8)',
+        borderColor: '#3B82F6',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const jobTitleOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: '#181F2A',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        borderColor: '#232B3B',
+        borderWidth: 1,
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: function(context: { parsed: { x: number }; dataIndex: number }) {
+            const jobTitle = jobTitleData.labels[context.dataIndex];
+            const totalApps = analytics.insights.successByJobTitle[context.dataIndex]?.total_applications || 0;
+            return [
+              `Job Title: ${jobTitle}`,
+              `Success Rate: ${context.parsed.x.toFixed(1)}%`,
+              `Total Applications: ${totalApps}`
+            ];
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        max: 100,
+        grid: {
+          color: '#232B3B',
+        },
+        ticks: {
+          color: '#9CA3AF',
+          callback: function(this: unknown, tickValue: string | number) {
+            return tickValue + '%';
+          }
+        },
+      },
+      y: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#9CA3AF',
+        },
+      },
+    },
+  };
+
   return (
     <div className="flex min-h-screen bg-[#151A23]">
       <Sidebar />
@@ -486,45 +628,168 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Insights Section */}
-        {analytics.insights.conversionByPlatform.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Platform Performance */}
+          {analytics.insights.conversionByPlatform.length > 0 && (
+            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B]">
+              <h2 className="text-white font-semibold mb-4">Platform Performance</h2>
+              <div className="h-64">
+                <Bar data={platformData} options={platformOptions} />
+              </div>
+            </div>
+          )}
+
+          {/* Job Type Success Rate */}
+          {analytics.insights.successByJobType.length > 0 && (
+            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B]">
+              <h2 className="text-white font-semibold mb-4">Success Rate by Job Type</h2>
+              <div className="h-64">
+                <Bar data={jobTypeData} options={jobTypeOptions} />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Success Rate by Job Title */}
+        {analytics.insights.successByJobTitle.length > 0 && (
           <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B] mb-8">
-            <h2 className="text-white font-semibold mb-4">Platform Performance</h2>
-            <div className="h-64">
-              <Bar data={platformData} options={platformOptions} />
+            <h2 className="text-white font-semibold mb-4">Success Rate by Job Title</h2>
+            <div className="h-96">
+              <Bar data={jobTitleData} options={jobTitleOptions} />
             </div>
           </div>
         )}
 
-        {/* Recent Applications */}
-        <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B] mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-semibold">Recent Applications</h2>
-            <a href="/home" className="text-blue-400 text-sm font-semibold hover:underline transition-colors">View all</a>
+        {/* Insights Summary */}
+        {analytics.insights.successByJobType.length > 0 && (
+          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B] mb-8">
+            <h2 className="text-white font-semibold mb-4">Key Insights</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {(() => {
+                const bestJobType = analytics.insights.successByJobType[0];
+                const bestPlatform = analytics.insights.conversionByPlatform.length > 0 
+                  ? analytics.insights.conversionByPlatform.reduce((prev, current) => 
+                      parseFloat(prev.conversion_rate) > parseFloat(current.conversion_rate) ? prev : current
+                    )
+                  : null;
+                
+                return (
+                  <>
+                    {bestJobType && (
+                      <div className="bg-[#232B3B] rounded-lg p-4">
+                        <div className="text-green-400 text-sm font-semibold mb-1">Best Performing Job Type</div>
+                        <div className="text-white font-bold text-lg">{bestJobType.job_type}</div>
+                        <div className="text-gray-400 text-sm">
+                          {parseFloat(bestJobType.success_rate).toFixed(1)}% success rate
+                        </div>
+                        <div className="text-gray-400 text-xs">
+                          {bestJobType.total_applications} applications
+                        </div>
+                      </div>
+                    )}
+                    
+                    {bestPlatform && (
+                      <div className="bg-[#232B3B] rounded-lg p-4">
+                        <div className="text-blue-400 text-sm font-semibold mb-1">Best Platform</div>
+                        <div className="text-white font-bold text-lg">{bestPlatform.platform}</div>
+                        <div className="text-gray-400 text-sm">
+                          {parseFloat(bestPlatform.conversion_rate).toFixed(1)}% conversion rate
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="bg-[#232B3B] rounded-lg p-4">
+                      <div className="text-purple-400 text-sm font-semibold mb-1">Overall Success</div>
+                      <div className="text-white font-bold text-lg">{conversionRate}%</div>
+                      <div className="text-gray-400 text-sm">
+                        conversion rate
+                      </div>
+                      <div className="text-gray-400 text-xs">
+                        {analytics.summary.totalApplications} total applications
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
           </div>
-          <div className="flex flex-col gap-4">
-            {analytics.recentApplications.length > 0 ? (
-              analytics.recentApplications.map((app, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-[#232B3B] rounded-lg px-4 py-3 hover:bg-[#2A3441] transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-lg">
-                      {app.title[0]?.toUpperCase() || '?'}
-                    </div>
-                    <div>
-                      <div className="text-white font-semibold">{app.title}</div>
-                      <div className="text-gray-400 text-sm">{app.company}</div>
-                    </div>
-                    <span className={`ml-4 px-2 py-1 rounded text-xs font-semibold ${getStageColor(app.status)} text-white capitalize`}>
-                      {app.status}
-                    </span>
-                  </div>
-                  <div className="text-gray-400 text-xs">{formatDate(app.created_at)}</div>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-gray-400 py-8">
-                <p>No applications yet. Start tracking your job applications!</p>
+        )}
+
+        {/* CV Performance and Recent Applications */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Best Performing CVs */}
+          {analytics.insights.bestPerformingCVs.length > 0 && (
+            <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B]">
+              <h2 className="text-white font-semibold mb-4">Best Performing CVs</h2>
+              <div className="space-y-3">
+                {analytics.insights.bestPerformingCVs
+                  .sort((a, b) => {
+                    const rateA = parseInt(a.successful_apps) / parseInt(a.total_apps);
+                    const rateB = parseInt(b.successful_apps) / parseInt(b.total_apps);
+                    return rateB - rateA;
+                  })
+                  .slice(0, 5)
+                  .map((cv, idx) => {
+                    const successRate = parseInt(cv.total_apps) > 0 
+                      ? Math.round((parseInt(cv.successful_apps) / parseInt(cv.total_apps)) * 100)
+                      : 0;
+                    const fileName = cv.cv_file_url ? cv.cv_file_url.split('/').pop()?.replace('.pdf', '') || 'CV' : 'CV';
+                    
+                    return (
+                      <div key={idx} className="flex items-center justify-between bg-[#232B3B] rounded-lg px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
+                            {fileName[0]?.toUpperCase() || 'C'}
+                          </div>
+                          <div>
+                            <div className="text-white text-sm font-medium">{fileName}</div>
+                            <div className="text-gray-400 text-xs">
+                              {cv.successful_apps}/{cv.total_apps} successful
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-green-400 font-semibold text-sm">{successRate}%</div>
+                          <div className="text-gray-400 text-xs">success rate</div>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Recent Applications */}
+          <div className="rounded-xl bg-[#181F2A] p-6 shadow-md border border-[#232B3B]">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-white font-semibold">Recent Applications</h2>
+              <a href="/home" className="text-blue-400 text-sm font-semibold hover:underline transition-colors">View all</a>
+            </div>
+            <div className="flex flex-col gap-4">
+              {analytics.recentApplications.length > 0 ? (
+                analytics.recentApplications.map((app, idx) => (
+                  <div key={idx} className="flex items-center justify-between bg-[#232B3B] rounded-lg px-4 py-3 hover:bg-[#2A3441] transition-colors">
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-white font-bold text-lg">
+                        {app.title[0]?.toUpperCase() || '?'}
+                      </div>
+                      <div>
+                        <div className="text-white font-semibold">{app.title}</div>
+                        <div className="text-gray-400 text-sm">{app.company}</div>
+                      </div>
+                      <span className={`ml-4 px-2 py-1 rounded text-xs font-semibold ${getStageColor(app.status)} text-white capitalize`}>
+                        {app.status}
+                      </span>
+                    </div>
+                    <div className="text-gray-400 text-xs">{formatDate(app.created_at)}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-gray-400 py-8">
+                  <p>No applications yet. Start tracking your job applications!</p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

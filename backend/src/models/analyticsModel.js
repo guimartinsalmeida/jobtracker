@@ -5,7 +5,7 @@ export const getAnalyticsByUserIdService = async (userId) => {
   const totalAppsResult = await pool.query(
     'SELECT COUNT(*) FROM jobs WHERE user_id = $1',
     [userId]
-  );
+  );  
   const totalApplications = parseInt(totalAppsResult.rows[0].count);
 
   // Status counts
@@ -68,20 +68,38 @@ export const getAnalyticsByUserIdService = async (userId) => {
     [userId]
   );
 
+  // Success rate by job title
+  const successByJobTitleResult = await pool.query(
+    `SELECT job_title, 
+            COUNT(*) FILTER (WHERE status = 'offer')::float / NULLIF(COUNT(*), 0) * 100 as success_rate,
+            COUNT(*) as total_applications
+     FROM jobs
+     WHERE user_id = $1 AND job_title IS NOT NULL AND job_title != ''
+     GROUP BY job_title
+     HAVING COUNT(*) > 0
+     ORDER BY success_rate DESC`,
+    [userId]
+  );
+
+
+
   // Success rate by job type
   const successByJobTypeResult = await pool.query(
     `SELECT job_type, 
-            COUNT(*) FILTER (WHERE status = 'offer')::float / NULLIF(COUNT(*), 0) * 100 as success_rate
+            COUNT(*) FILTER (WHERE status = 'offer')::float / NULLIF(COUNT(*), 0) * 100 as success_rate,
+            COUNT(*) as total_applications
      FROM jobs
-     WHERE user_id = $1
-     GROUP BY job_type`,
+     WHERE user_id = $1 AND job_type IS NOT NULL AND job_type != ''
+     GROUP BY job_type
+     HAVING COUNT(*) > 0
+     ORDER BY success_rate DESC`,
     [userId]
   );
 
   // Best performing CV
   const cvPerformanceResult = await pool.query(
     `SELECT cv_file_url, 
-            COUNT(*) FILTER (WHERE status IN ('Interviewed', 'offer')) as successful_apps,
+            COUNT(*) FILTER (WHERE status IN ('interviewed', 'offer')) as successful_apps,
             COUNT(*) as total_apps
      FROM jobs
      WHERE user_id = $1
@@ -101,7 +119,9 @@ export const getAnalyticsByUserIdService = async (userId) => {
     recentApplications: recentApplicationsResult.rows,
     insights: {
       conversionByPlatform: conversionByPlatformResult.rows,
+      successByJobTitle: successByJobTitleResult.rows,
       successByJobType: successByJobTypeResult.rows,
+      successByJobTitle: successByJobTitleResult.rows,
       bestPerformingCVs: cvPerformanceResult.rows
     }
   };
