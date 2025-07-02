@@ -5,6 +5,7 @@ import { RiAiGenerate2 } from "react-icons/ri";
 
 import { SidebarItem } from '@/components/layout/SidebarItem';
 import { usePathname, useRouter } from 'next/navigation';
+import { UserCVs } from './UserCVs';
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -18,7 +19,7 @@ export function Sidebar() {
         </button>
         
       </div>
-      <nav className="flex flex-col gap-2 overflow-y-auto">
+      <nav className="flex flex-col gap-2 overflow-y-auto flex-1">
         <SidebarItem icon={<FiBriefcase />} label="Jobs" href="/home" active={pathname === '/home'} />
         <SidebarItem icon={<FiBarChart2 />} label="Analytics" href="/analitycs" active={pathname === '/analitycs'} />
         <SidebarItem icon={<RiAiGenerate2 />} label="CV Analysis" href="/analisys-cv" active={pathname === '/analisys-cv'} />
@@ -26,6 +27,10 @@ export function Sidebar() {
         <SidebarItem icon={<RiAiGenerate2 />} label="Interview Prep" href="/interview-preparation" active={pathname === '/interview-preparation'} />
         <SidebarItem icon={<FiUser />} label="Profile" href="/profile" active={pathname === '/profile'} />
       </nav>
+      
+      <div className="mt-6 border-t border-gray-700/50 pt-4">
+        <UserCVs />
+      </div>
     </aside>
   );
 } 

@@ -94,6 +94,13 @@ export const getJobById = async (req, res) => {
 // 🔸 Get job by User ID
 export const getJobsByUserId = async (req, res) => {
   const { id } = req.params
+  const authenticatedUserId = req.userId
+  
+  // Ensure the authenticated user can only access their own jobs
+  if (authenticatedUserId !== id) {
+    return res.status(403).json({ message: 'Access denied. You can only access your own jobs.' })
+  }
+  
   try {
     const jobs = await getJobsByUserIdService(id)
     res.status(200).json(jobs)

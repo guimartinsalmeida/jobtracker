@@ -67,6 +67,12 @@ export default function AnalyticsPage() {
       try {
         setError(null);
         const token = localStorage.getItem('token');
+        
+        if (!token) {
+          setError('No authentication token found');
+          return;
+        }
+        
         const response = await axios.get(`http://localhost:3001/api/analytics/user/${user.id}`, {
           headers: {
             Authorization: `Bearer ${token}`
@@ -76,7 +82,11 @@ export default function AnalyticsPage() {
         console.log(response.data);
       } catch (error) {
         console.error('Error fetching analytics:', error);
-        setError('Failed to load analytics data. Please try again.');
+        if (axios.isAxiosError(error) && error.response?.status === 403) {
+          setError('Access denied. Please log in again.');
+        } else {
+          setError('Failed to load analytics data. Please try again.');
+        }
       } finally {
         setLoading(false);
       }

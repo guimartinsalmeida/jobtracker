@@ -11,7 +11,7 @@ import Head from 'next/head';
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, logout } = useUser();
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -25,8 +25,9 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem('token');
-      router.push('/auth/login');
+      logout();
+      // Force a page reload to clear any React state
+      window.location.href = '/auth/login';
     } catch (error) {
       console.error('Error during logout:', error);
     }

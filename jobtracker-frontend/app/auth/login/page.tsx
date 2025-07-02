@@ -43,6 +43,10 @@ export default function LoginPage() {
 
     setIsLoading(true);
     try {
+      // Clear any existing user data before login
+      localStorage.removeItem('user');
+      sessionStorage.clear();
+      
       const res = await axios.post('http://localhost:3001/api/auth/login', { email, password });
       localStorage.setItem('token', res.data.token);
       if (rememberMe) {

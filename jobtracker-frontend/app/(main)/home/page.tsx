@@ -47,25 +47,41 @@ export default function HomePage() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
+      // Clear any stale user data and redirect
+      localStorage.removeItem('user');
       router.push('/auth/login');
       return;
     }
 
     const initializeData = async () => {
       try {
-        // If we don't have user data, try to fetch it
-        if (!user) {
-          const savedUser = localStorage.getItem('user');
-          if (savedUser) {
-            const parsedUser = JSON.parse(savedUser);
-            await fetchUserData(parsedUser.id);
-          } else {
-            router.push('/auth/login');
-            return;
+        // Wait for user to be loaded
+        if (!user || !user.id) {
+          // If we don't have user data, try to fetch it
+          if (!user) {
+            const savedUser = localStorage.getItem('user');
+            if (savedUser) {
+              try {
+                const parsedUser = JSON.parse(savedUser);
+                await fetchUserData(parsedUser.id);
+                // Don't continue here, let the useEffect run again when user is loaded
+                return;
+              } catch (error) {
+                console.error('Error parsing saved user data:', error);
+                localStorage.removeItem('user');
+                router.push('/auth/login');
+                return;
+              }
+            } else {
+              router.push('/auth/login');
+              return;
+            }
           }
+          // If we have user but no ID, wait for it to be loaded
+          return;
         }
 
-        const response = await axios.get(`http://localhost:3001/api/jobs/user/${user?.id}`, {
+        const response = await axios.get(`http://localhost:3001/api/jobs/user/${user.id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
