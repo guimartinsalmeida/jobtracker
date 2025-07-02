@@ -5,6 +5,7 @@ import pool from './config/db.js'
 import authRoutes from './routes/authRoutes.js'
 import userRoutes from './routes/userRoutes.js'
 import jobRoutes from './routes/jobRoutes.js'
+import cvRoutes from './routes/cvRoutes.js'
 import errorHandling from './middlewares/errorHandler.js'
 import resumeAnalysisRoutes from './routes/resumeAnalysisRoutes.js'
 import path from 'path'
@@ -13,6 +14,8 @@ import analyticsRoutes from './routes/analyticsRoutes.js'
 import axios from 'axios'
 import { removeExtraFields } from './data/removeExtraFields.js'
 import { addStatusColumn } from './data/addStatusColumn.js'
+import { createCVTable } from './data/createCVTable.js'
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,8 +41,10 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
 app.use('/api/auth', authRoutes)
 app.use('/api/users', userRoutes)
 app.use('/api/jobs', jobRoutes)
+app.use('/api/cvs', cvRoutes)
 app.use('/api/resume', resumeAnalysisRoutes)
 app.use('/api/analytics', analyticsRoutes)
+
 app.use(errorHandling)
 //testing pg connection
 app.get('/', async(req, res) =>{
@@ -54,6 +59,8 @@ app.listen(port, async () =>{
    await removeExtraFields()
    // Add status column to jobs table
    await addStatusColumn()
+   // Create CV table
+   await createCVTable()
 })
 
 axios.defaults.withCredentials = true;

@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
-import { FaFileAlt } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaFileAlt, FaUpload } from 'react-icons/fa';
+import CVSelector from './CVSelector';
 
 export interface JobFormData {
   job_title: string;
@@ -8,6 +9,13 @@ export interface JobFormData {
   platform: string;
   status: string;
   cv_file_url: string;
+}
+
+interface CV {
+  id: number;
+  file_url: string;
+  original_filename: string;
+  created_at: string;
 }
 
 interface FormErrors {
@@ -31,9 +39,10 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
     cv_file_url: '',
   });
 
-  const [errors, setErrors] = useState<FormErrors>({});
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedCV, setSelectedCV] = useState<CV | null>(null);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   useEffect(() => {
     if (initialData) {
@@ -56,8 +65,7 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
     if (!form.platform.trim()) {
       newErrors.platform = 'Platform is required';
     }
-   
-    if (!form.cv_file_url && !selectedFile) {
+    if (!selectedCV && !uploadedFile) {
       newErrors.cv_file_url = 'CV/Resume is required';
     }
 
@@ -73,23 +81,6 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.type === 'application/pdf') {
-        setSelectedFile(file);
-        setForm(prev => ({ ...prev, cv_file_url: file.name }));
-        setErrors(prev => ({ ...prev, cv_file_url: '' }));
-      } else {
-        setErrors(prev => ({ ...prev, cv_file_url: 'Please select a PDF file' }));
-      }
-    }
-  };
-
-  const handleFileClick = () => {
-    fileInputRef.current?.click();
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -97,17 +88,23 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
       return;
     }
     
-    if (selectedFile) {
+    // Create FormData if we have a file to upload
+    if (uploadedFile) {
       const formData = new FormData();
-      formData.append('cv_file', selectedFile);
-      
-      Object.keys(form).forEach(key => {
-        if (key !== 'cv_file_url') {
-          formData.append(key, form[key as keyof typeof form]);
-        }
-      });
-
+      formData.append('cv_file', uploadedFile);
+      formData.append('job_title', form.job_title);
+      formData.append('company_name', form.company_name);
+      formData.append('job_type', form.job_type);
+      formData.append('platform', form.platform);
+      formData.append('status', form.status);
       onSubmit(formData);
+    } else if (selectedCV) {
+      // Use selected CV
+      const formWithCV = {
+        ...form,
+        cv_file_url: selectedCV.file_url
+      };
+      onSubmit(formWithCV);
     } else {
       onSubmit(form);
     }
@@ -117,6 +114,29 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
     if (e.key === 'Enter' && e.ctrlKey) {
       handleSubmit(e);
     }
+  };
+
+  const handleCVSelect = (cv: CV | null) => {
+    setSelectedCV(cv);
+    setUploadedFile(null);
+    if (errors.cv_file_url) {
+      setErrors(prev => ({ ...prev, cv_file_url: '' }));
+    }
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setUploadedFile(file);
+      setSelectedCV(null);
+      if (errors.cv_file_url) {
+        setErrors(prev => ({ ...prev, cv_file_url: '' }));
+      }
+    }
+  };
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
 
   const renderError = (fieldName: string) => {
@@ -194,38 +214,50 @@ export default function JobForm({ onSubmit, onCancel, initialData, isSubmitting 
             {renderError('platform')}
           </div>
 
-         
-
           <div>
-            <label className="block mb-1 text-sm font-medium">Resume/CV <span className="text-red-400">*</span></label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-              <div>
-                <input 
-                  type="text" 
-                  value={form.cv_file_url} 
-                  readOnly 
-                  placeholder="Select a PDF file" 
-                  className={`w-full p-2 rounded bg-[#23283A] focus:ring-2 focus:ring-blue-500 outline-none ${errors.cv_file_url ? 'border border-red-400' : ''}`}
-                />
-                {renderError('cv_file_url')}
-              </div>
-              <div>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  accept=".pdf"
-                  className="hidden"
-                />
-                <button 
-                  type="button" 
-                  onClick={handleFileClick}
-                  className="w-full flex items-center justify-center gap-2 p-2 rounded bg-gray-700 hover:bg-gray-800 text-sm font-medium"
-                >
-                  <span>Upload PDF</span>
-                </button>
-              </div>
+            <CVSelector
+              onSelectCV={handleCVSelect}
+              selectedCV={selectedCV}
+              disabled={isSubmitting}
+            />
+            {renderError('cv_file_url')}
+            
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={handleUploadClick}
+                disabled={isSubmitting}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-[#2A3140] hover:bg-[#323A4A] rounded transition disabled:opacity-50"
+              >
+                <FaUpload className="text-blue-400" />
+                Upload new CV
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
             </div>
+            
+            {uploadedFile && (
+              <div className="mt-2 p-2 bg-[#1A1F2A] rounded border border-[#2A3140]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FaFileAlt className="text-blue-400 text-sm" />
+                    <span className="text-sm">{uploadedFile.name}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUploadedFile(null)}
+                    className="text-xs text-red-400 hover:text-red-300"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

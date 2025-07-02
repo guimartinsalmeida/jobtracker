@@ -6,6 +6,7 @@ import {
   deleteJobService,
   getJobsByUserIdService
 } from '../models/jobModel.js'
+import { saveCVToDB } from '../models/cvModel.js'
 import { upload } from '../middlewares/uploadMiddleware.js'
 
 // 🔸 Create an job
@@ -27,10 +28,19 @@ export const createJob = async (req, res) => {
 
       const user_id = req.userId
       
-      // Get the file path if a file was uploaded
-      const cv_file_url = req.file ? `/uploads/${req.file.filename}` : null
+      // Get the file path if a file was uploaded, or use existing CV URL
+      const cv_file_url = req.file ? `/uploads/${req.file.filename}` : req.body.cv_file_url || null
 
       try {
+        // If a new CV file was uploaded, save it to the CVs table
+        if (req.file) {
+          await saveCVToDB({
+            user_id,
+            file_url: cv_file_url,
+            original_filename: req.file.originalname
+          })
+        }
+
         const job = await createJobInDB({
           user_id,
           job_title,
@@ -111,6 +121,15 @@ export const updateJob = async (req, res) => {
       }
 
       try {
+        // If a new CV file was uploaded, save it to the CVs table
+        if (req.file) {
+          await saveCVToDB({
+            user_id: req.userId,
+            file_url: jobData.cv_file_url,
+            original_filename: req.file.originalname
+          })
+        }
+
         const updatedJob = await updateJobService(id, jobData);
 
         if (!updatedJob) {

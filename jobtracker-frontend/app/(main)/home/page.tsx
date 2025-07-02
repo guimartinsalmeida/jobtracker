@@ -117,15 +117,23 @@ export default function HomePage() {
   const handleJobFormSubmit = async (data: JobFormData | FormData) => {
     try {
       const token = localStorage.getItem('token');
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${token}`,
+      };
+      
+      // If it's FormData, don't set Content-Type header (let browser set it with boundary)
+      if (!(data instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+      }
+      
       await axios.post('http://localhost:3001/api/jobs', data, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers,
       });
       setIsModalOpen(false);
       // Refresh the jobs list
       window.location.reload();
-    } catch {
+    } catch (error) {
+      console.error('Error creating job:', error);
       alert('Erro ao criar job. Tente novamente.');
     }
   };
