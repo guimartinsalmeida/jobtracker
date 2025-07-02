@@ -146,6 +146,10 @@ export default function HomePage() {
     );
   };
 
+  const handleDelete = (jobId: number) => {
+    setJobs(prevJobs => prevJobs.filter(job => job.id !== jobId));
+  };
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen bg-[#151A23]">
@@ -207,7 +211,12 @@ export default function HomePage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredJobs.map((job) => (
-              <JobCard key={job.id} job={job} onStatusUpdate={handleStatusUpdate} />
+              <JobCard 
+                key={job.id} 
+                job={job} 
+                onStatusUpdate={handleStatusUpdate} 
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
